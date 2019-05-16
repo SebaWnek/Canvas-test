@@ -11,7 +11,7 @@ namespace Canvas_test
     {
         private Rectangle Body;
         public int Position { get; set; }
-        private int targetDistance = 50;
+        public int targetDistance { get; set; } = 50;
         public char Direction { get; set; } = 'r';
 
 

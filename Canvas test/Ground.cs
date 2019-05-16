@@ -40,10 +40,25 @@ namespace Canvas_test
 
         private void GenerateTerrain(double variations)
         {
-            Height[0] = rnd.Next(100, 200);
+            int signCounter = rnd.Next(0, terrainLength / 10);
+            int sign = rnd.Next(2);
+            if (sign == 0) sign = -1;
+            int angleCounter = rnd.Next(0, terrainLength / 10);
+            int angle = rnd.Next(50);
+            Height[0] = rnd.Next(200, 300);
             for (int i = 1; i <= terrainLength; i++)
             {
-                Height[i] = Height[i - 1] + rnd.Next(-10, 11) * variations;
+                if (i > signCounter)
+                {
+                    sign = -sign;
+                    signCounter = rnd.Next(signCounter + 1, signCounter + terrainLength / 10);
+                }
+                if (i > angleCounter)
+                {
+                    angle = rnd.Next(50);
+                    angleCounter = rnd.Next(angleCounter + 1, angleCounter + terrainLength / 10);
+                }
+                Height[i] = Height[i - 1] + rnd.Next(angle) * variations * sign;
                 if (Height[i] < 0)
                 {
                     Height[i] = 0;
@@ -54,16 +69,17 @@ namespace Canvas_test
         public void DestroyTerrain(double hitX, int size)
         {
             int hitXint = (int)Math.Round(hitX) + 1;
-            Height[hitXint] -= size;
-            for (int i = 1; i < size; i++)
+            double medium = Height[hitXint];
+            double tmp;
+            for (int i = -size; i < size; i++)
             {
-                if (hitXint - i >= 0)
+                if (hitXint - i >= 0 && hitXint <= terrainLength)
                 {
-                    Height[hitXint - i] -= (size - i * i / size);
-                }
-                if (hitXint + i <= terrainLength)
-                {
-                    Height[hitXint + i] -= (size - i * i / size);
+                    tmp = Height[hitXint - i] - medium + (size - i * i / size) + rnd.Next(-1, 2);
+                    if (tmp > 0)
+                    {
+                        Height[hitXint - i] -= tmp;
+                    } 
                 }
             }
             HeigthToTerrain();

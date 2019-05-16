@@ -21,6 +21,7 @@
             <Polygon x:Name="ground" Stroke="Brown" StrokeThickness="2"/>
             <Rectangle x:Name="player1image" Stroke="Blue" Height="10" Width="10" Canvas.Top="100" Canvas.Left="100" Fill="Blue"/>
             <Rectangle x:Name="player1target" Stroke="red" Height="4" Width="4" Canvas.Top="100" Canvas.Left="100" Fill="red"/>
+            <Ellipse x:Name="explosion" Stroke="Orange" Height="150" Width="150" Canvas.Top="100" Canvas.Left="100" Fill="red"/>
         </Canvas>
     </Grid>
 </Window>

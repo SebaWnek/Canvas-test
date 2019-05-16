@@ -8,7 +8,7 @@ namespace Canvas_test
 {
     class Ball
     {
-        int animationSpeed { get; set; } = 20;
+        int animationSpeed { get; set; } = 5;
         private readonly double gravity = 9.81;
         public double X { get; set; }
         public double Y { get; set; }

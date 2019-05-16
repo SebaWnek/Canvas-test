@@ -15,6 +15,8 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Threading;
+using System.Windows.Media.Animation;
 
 namespace Canvas_test
 {
@@ -23,8 +25,8 @@ namespace Canvas_test
     /// </summary>
     public partial class MainWindow : Window
     {
-        Timer timer = new Timer();
-        int timeInterval = 1000 / 200;
+        System.Timers.Timer timer = new System.Timers.Timer();
+        int timeInterval = 10;
         int wind;
         Random rnd = new Random();
         Ball ball;
@@ -36,7 +38,8 @@ namespace Canvas_test
         bool hit = false;
         bool inside;
         int angle = 45;
-        int velocity = 10;
+        int velocity = 20;
+        int damage = 40;
         public MainWindow()
         {
             InitializeComponent();
@@ -58,9 +61,10 @@ namespace Canvas_test
                 {
                     timer.Stop();
                     GenerateWind();
-                    terrain.DestroyTerrain(ball.X, 100);
-                    Canvas.SetLeft(player1image, coord.ToInt(player1.Position, terrain.Height[player1.Position])[0] - 5);
-                    Canvas.SetTop(player1image, coord.ToInt(player1.Position, terrain.Height[player1.Position])[1] - 5);
+                    terrain.DestroyTerrain(ball.X, damage);
+                    MoveTank();
+                    MoveTarget();
+                    ShowExplosion();
                 }
                 if (inside == false)
                 {
@@ -68,6 +72,22 @@ namespace Canvas_test
                     GenerateWind();
                 }
             });
+        }
+
+        private void ShowExplosion()
+        {
+            Canvas.SetLeft(explosion, coord.ToInt(ball.X, ball.Y)[0] - explosion.Width / 2);
+            Canvas.SetTop(explosion, coord.ToInt(ball.X, ball.Y)[1] - explosion.Height / 2);
+            explosion.Opacity = 1;
+            var animation = new DoubleAnimation
+            {
+                To = 0,
+                BeginTime = TimeSpan.FromSeconds(0),
+                Duration = TimeSpan.FromSeconds(2),
+                FillBehavior = FillBehavior.Stop
+            };
+            animation.Completed += (s, a) => explosion.Opacity = 0;
+            explosion.BeginAnimation(UIElement.OpacityProperty, animation);
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -80,8 +100,20 @@ namespace Canvas_test
             vblock.Text = velocity.ToString();
             GenerateWind();
             player1 = new Player(10, player1image);
+            player1.targetDistance = velocity;
+            MoveTank();
+            MoveTarget();
+            explosion.Opacity = 0;
+        }
+
+        private void MoveTank()
+        {
             Canvas.SetLeft(player1image, coord.ToInt(player1.Position, terrain.Height[player1.Position])[0] - 5);
             Canvas.SetTop(player1image, coord.ToInt(player1.Position, terrain.Height[player1.Position])[1] - 5);
+        }
+
+        private void MoveTarget()
+        {
             Canvas.SetLeft(player1target, coord.ToInt(player1.Position + player1.GetTargetPosition(angle)[0],
                 terrain.Height[player1.Position] + player1.GetTargetPosition(angle)[1])[0] - 2);
             Canvas.SetTop(player1target, coord.ToInt(player1.Position + player1.GetTargetPosition(angle)[0],
@@ -95,7 +127,7 @@ namespace Canvas_test
                 line.Points.Clear();
                 hit = false;
                 inside = true;
-                ball = new Ball(player1.Position, terrain.Height[player1.Position], velocity, angle, player1.Direction);
+                ball = new Ball(player1.Position, terrain.Height[player1.Position] + 1, velocity, angle, player1.Direction);
                 line.Points.Add(coord.ToWindowsPoint(ball.X, ball.Y));
                 timer.Start();
             }
@@ -104,7 +136,9 @@ namespace Canvas_test
                 if (velocity < maxV)
                 {
                     velocity++;
-                    vblock.Text = velocity.ToString(); 
+                    player1.targetDistance = velocity;
+                    vblock.Text = velocity.ToString();
+                    MoveTarget();
                 }
             }
             if (e.Key == Key.Down && velocity > 0)
@@ -112,39 +146,28 @@ namespace Canvas_test
                 if (velocity > 0)
                 {
                     velocity--;
-                    vblock.Text = velocity.ToString(); 
+                    player1.targetDistance = velocity;
+                    vblock.Text = velocity.ToString();
+                    MoveTarget();
                 }
             }
             if (e.Key == Key.Left)
             {
                 angle--;
-                Canvas.SetLeft(player1target, coord.ToInt(player1.Position + player1.GetTargetPosition(angle)[0],
-                    terrain.Height[player1.Position] + player1.GetTargetPosition(angle)[1])[0] - 2);
-                Canvas.SetTop(player1target, coord.ToInt(player1.Position + player1.GetTargetPosition(angle)[0],
-                    terrain.Height[player1.Position] + player1.GetTargetPosition(angle)[1])[1] - 2);
-                angleblock.Text = angle.ToString();
+                MoveTarget();
             }
             if (e.Key == Key.Right)
             {
                 angle++;
-                Canvas.SetLeft(player1target, coord.ToInt(player1.Position + player1.GetTargetPosition(angle)[0],
-                    terrain.Height[player1.Position] + player1.GetTargetPosition(angle)[1])[0] - 2);
-                Canvas.SetTop(player1target, coord.ToInt(player1.Position + player1.GetTargetPosition(angle)[0],
-                    terrain.Height[player1.Position] + player1.GetTargetPosition(angle)[1])[1] - 2);
-                angleblock.Text = angle.ToString();
+                MoveTarget();
             }
             if (e.Key == Key.A)
             {
                 if (player1.Position > 0)
                 {
                     player1.Position--;
-                    Canvas.SetLeft(player1image, coord.ToInt(player1.Position, terrain.Height[player1.Position])[0] - 5);
-                    Canvas.SetTop(player1image, coord.ToInt(player1.Position, terrain.Height[player1.Position])[1] - 5);
-                    Canvas.SetLeft(player1target, coord.ToInt(player1.Position + player1.GetTargetPosition(angle)[0],
-                        terrain.Height[player1.Position] + player1.GetTargetPosition(angle)[1])[0] - 2);
-                    Canvas.SetTop(player1target, coord.ToInt(player1.Position + player1.GetTargetPosition(angle)[0],
-                        terrain.Height[player1.Position] + player1.GetTargetPosition(angle)[1])[1] - 2);
-                    angleblock.Text = angle.ToString();
+                    MoveTarget();
+                    MoveTank();
                 }
             }
             if (e.Key == Key.D)
@@ -152,13 +175,8 @@ namespace Canvas_test
                 if (player1.Position < terrainLength)
                 {
                     player1.Position++;
-                    Canvas.SetLeft(player1image, coord.ToInt(player1.Position, terrain.Height[player1.Position])[0] - 5);
-                    Canvas.SetTop(player1image, coord.ToInt(player1.Position, terrain.Height[player1.Position])[1] - 5);
-                    Canvas.SetLeft(player1target, coord.ToInt(player1.Position + player1.GetTargetPosition(angle)[0],
-                        terrain.Height[player1.Position] + player1.GetTargetPosition(angle)[1])[0] - 2);
-                    Canvas.SetTop(player1target, coord.ToInt(player1.Position + player1.GetTargetPosition(angle)[0],
-                        terrain.Height[player1.Position] + player1.GetTargetPosition(angle)[1])[1] - 2);
-                    angleblock.Text = angle.ToString();
+                    MoveTarget();
+                    MoveTank();
                 }
             }
         }
