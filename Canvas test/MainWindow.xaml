@@ -5,15 +5,22 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Canvas_test"
         mc:Ignorable="d"
-        Title="MainWindow" Height="800" Width="800"
-        Loaded="Window_Loaded">
+        Title="MainWindow" WindowState="Maximized"
+        Loaded="Window_Loaded"
+        KeyDown="Window_KeyDown">
     <Grid>
         <Canvas x:Name="background">
             <TextBlock Text="0" x:Name="xBlock" Canvas.Top="0"/>
             <TextBlock Text="0" x:Name="yBlock" Canvas.Top="12"/>
             <TextBlock Text="0" x:Name="vxBlock" Canvas.Top="24"/>
             <TextBlock Text="0" x:Name="vyBlock" Canvas.Top="36"/>
+            <TextBlock Text="0" x:Name="windBlock" Canvas.Top="48"/>
+            <TextBlock Text="0" x:Name="vblock" Canvas.Top="0" Canvas.Left="120"/>
+            <TextBlock Text="0" x:Name="angleblock" Canvas.Top="12" Canvas.Left="120"/>
             <Polyline x:Name="line" Stroke="Black" StrokeThickness="1"/>
+            <Polygon x:Name="ground" Stroke="Brown" StrokeThickness="2"/>
+            <Rectangle x:Name="player1image" Stroke="Blue" Height="10" Width="10" Canvas.Top="100" Canvas.Left="100" Fill="Blue"/>
+            <Rectangle x:Name="player1target" Stroke="red" Height="4" Width="4" Canvas.Top="100" Canvas.Left="100" Fill="red"/>
         </Canvas>
     </Grid>
 </Window>

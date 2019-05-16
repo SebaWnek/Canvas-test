@@ -8,6 +8,7 @@ namespace Canvas_test
 {
     class Ball
     {
+        int animationSpeed { get; set; } = 20;
         private readonly double gravity = 9.81;
         public double X { get; set; }
         public double Y { get; set; }
@@ -27,7 +28,7 @@ namespace Canvas_test
             Y = y;
             if (direction == 'r')
             {
-                radAngle = -(angle - 90) * Math.PI / 180; 
+                radAngle = (angle) * Math.PI / 180;
             }
             else
             {
@@ -38,10 +39,10 @@ namespace Canvas_test
         }
         public void CalculateNewPosition(double wind, int timeInterval)
         {
-            X += SpeedX * timeInterval / 1000;
-            Y += SpeedY * timeInterval / 1000;
-            SpeedX -= gravity * timeInterval / 1000;
-            SpeedY += wind * timeInterval / 1000;
+            X += animationSpeed * SpeedX * timeInterval / 1000;
+            Y += animationSpeed * SpeedY * timeInterval / 1000;
+            SpeedX += wind * timeInterval / 1000;
+            SpeedY -= gravity * timeInterval / 1000;
         }
     }
 }

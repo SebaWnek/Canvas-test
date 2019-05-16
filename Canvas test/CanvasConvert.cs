@@ -22,13 +22,29 @@ namespace Canvas_test
             conversionRate = canvasWidth / fieldWidth;
             fieldHeigth = canvasHeigth / conversionRate;
         }
-        public Point CovertCoordinates(double x, double y)
+        public Point ToWindowsPoint(double x, double y)
         {
             double resultX;
             double resultY;
-            resultX = y * conversionRate;
-            resultY = canvasHeigth - x * conversionRate;
+            resultX = x * conversionRate;
+            resultY = canvasHeigth - y * conversionRate;
             return new Point(resultX, resultY);
+        }
+        public int[] ToInt(double x, double y)
+        {
+            int resultX;
+            int resultY;
+            resultX = (int)(x * conversionRate);
+            resultY = (int)(canvasHeigth - y * conversionRate);
+            return new int[] { resultX, resultY };
+        }
+        public System.Drawing.Point ToDrawingPoint(double x, double y)
+        {
+            int resultX;
+            int resultY;
+            resultX = (int)(x * conversionRate);
+            resultY = (int)(canvasHeigth - y * conversionRate);
+            return new System.Drawing.Point(resultX, resultY);
         }
     }
 }
