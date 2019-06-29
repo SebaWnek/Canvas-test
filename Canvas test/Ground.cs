@@ -45,7 +45,7 @@ namespace Canvas_test
             if (sign == 0) sign = -1;
             int angleCounter = rnd.Next(0, terrainLength / 10);
             int angle = rnd.Next(50);
-            Height[0] = rnd.Next(200, 300);
+            Height[0] = rnd.Next(100, 200);
             for (int i = 1; i <= terrainLength; i++)
             {
                 if (i > signCounter)
@@ -73,7 +73,7 @@ namespace Canvas_test
             double tmp;
             for (int i = -size; i < size; i++)
             {
-                if (hitXint - i >= 0 && hitXint <= terrainLength)
+                if (hitXint - i >= 0 && hitXint - i <= terrainLength)
                 {
                     tmp = Height[hitXint - i] - medium + (size - i * i / size) + rnd.Next(-1, 2);
                     if (tmp > 0)
@@ -88,7 +88,7 @@ namespace Canvas_test
         public bool CheckHit(double x, double y)
         {
             int roundX = (int)Math.Round(x);
-            if (roundX > 0 && roundX <= terrainLength + 1 && y <= Height[roundX])
+            if (roundX > 0 && roundX <= terrainLength && y <= Height[roundX])
             {
                 return true;
             }
