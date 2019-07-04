@@ -18,6 +18,7 @@ using System.Drawing.Drawing2D;
 using System.Threading;
 using System.Windows.Media.Animation;
 using System.Reflection;
+using System.Collections.ObjectModel;
 
 namespace Canvas_test
 {
@@ -30,10 +31,10 @@ namespace Canvas_test
         int timeInterval = 10;
         int wind;
         Random rnd = new Random();
-        Ball ball = null;
+        Bullet bullet = null;
         int terrainLength = 1000;
-        int maxV = 50; 
-        CanvasConvert coord;
+        int maxV = 50;
+        public CanvasConvert coord;
         Ground terrain;
         int playerCount;
         List<Player> players;
@@ -42,6 +43,8 @@ namespace Canvas_test
         bool inside;
         Player activePlayer;
         private List<System.Windows.Media.Brush> _brushes;
+        ObservableCollection<Bullet> currentBullets = new ObservableCollection<Bullet>();
+
         public MainWindow()
         {
             InitializeComponent();
@@ -59,53 +62,73 @@ namespace Canvas_test
                 players.Add(new Player(rnd.Next(10, terrainLength - 10), "player" + (i + 1).ToString(), GetRandomBrush(), coord, terrain));
                 players[i].MoveTank();
                 players[i].MoveTarget();
+                players[i].AddBullet(new Bullet(Bullet.BulletType.SmallBullet, 99));
+                players[i].AddBullet(new Bullet(Bullet.BulletType.BigBullet, 10));
+                players[i].AddBullet(new Bullet(Bullet.BulletType.Nuclear, 1));
+                players[i].SelectedBullet = players[i].Bullets[Bullet.BulletType.SmallBullet];
             }
             activePlayer = players[0];
+            background.DataContext = activePlayer;
+            bulletSelector.ItemsSource = currentBullets;
             activePlayer.activeSign.Visibility = Visibility.Visible;
             activePlayer.target.Visibility = Visibility.Visible;
             timer.Elapsed += Timer_Elapsed;
             timer.Interval = timeInterval;
-            angleblock.Text = activePlayer.angle.ToString();
-            vblock.Text = activePlayer.Velocity.ToString();
+            Sky.GenerateClouds(10);
             GenerateWind();
+            ListCurrentBullets();
         }
 
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            ball.CalculateNewPosition(wind, timeInterval);
+            bullet.CalculateNewPosition(wind, timeInterval);
             Dispatcher.InvokeAsync(() =>
             {
-                xBlock.Text = ball.X.ToString();
-                yBlock.Text = ball.Y.ToString();
-                vxBlock.Text = ball.SpeedX.ToString();
-                vyBlock.Text = ball.SpeedY.ToString();
-                line.Points.Add(coord.ToWindowsPoint(ball.X, ball.Y));
-                hit = terrain.CheckHit(ball.X,ball.Y);
-                inside = ball.Y >= 0;
+                xBlock.Text = bullet.X.ToString();
+                yBlock.Text = bullet.Y.ToString();
+                vxBlock.Text = bullet.SpeedX.ToString();
+                vyBlock.Text = bullet.SpeedY.ToString();
+                line.Points.Add(coord.ToWindowsPoint(bullet.X, bullet.Y));
+                hit = terrain.CheckHit(bullet.X, bullet.Y);
+                inside = bullet.Y >= 0;
                 if (hit == true)
                 {
                     timer.Stop();
                     GenerateWind();
-                    terrain.DestroyTerrain(ball.X, activePlayer.Damage);
+                    terrain.DestroyTerrain(bullet.X, bullet.ExplosionDestroyDistance);
                     activePlayer.MoveTank();
                     activePlayer.MoveTarget();
-                    ShowExplosion(150);
-                    foreach(Player player in players)
+                    ShowExplosion(bullet.ExplosionRadius);
+                    foreach (Player player in players)
                     {
                         player.MoveTank();
                         player.MoveTarget();
                     }
-                    CheckDamage(ball.X);
-                    ball = null;
-                    activePlayer = nextPlayer();
+                    CheckDamage(bullet.X);
+                    bullet = null;
+                    activePlayer = NextPlayer();
+                    ListCurrentBullets();
                 }
                 if (inside == false)
                 {
                     timer.Stop();
                     GenerateWind();
-                    ball = null;
+                    bullet = null;
 
-                    activePlayer = nextPlayer();
+                    activePlayer = NextPlayer();
+                    ListCurrentBullets();
+                }
+            });
+        }
+
+        private void ListCurrentBullets()
+        {
+            Dispatcher.Invoke(() =>
+            {
+                currentBullets.Clear();
+                foreach (KeyValuePair<Bullet.BulletType, Bullet> bullet in activePlayer.Bullets)
+                {
+                    currentBullets.Add(bullet.Value);
                 }
             });
         }
@@ -113,9 +136,9 @@ namespace Canvas_test
         private void CheckDamage(double x)
         {
             bool isAlive;
-            foreach(Player player in players)
+            foreach (Player player in players)
             {
-                isAlive = player.CheckIfAlive(x, activePlayer.Damage);
+                isAlive = player.CheckIfAlive(x, bullet.Damage, bullet.ExplosionDestroyDistance);
                 if (!isAlive)
                 {
                     player.RemovePlayer();
@@ -143,7 +166,7 @@ namespace Canvas_test
             }
         }
 
-        private Player nextPlayer()
+        private Player NextPlayer()
         {
             activePlayer.activeSign.Visibility = Visibility.Hidden;
             activePlayer.target.Visibility = Visibility.Hidden;
@@ -152,12 +175,14 @@ namespace Canvas_test
             {
                 players[currentPlayerNumber + 1].activeSign.Visibility = Visibility.Visible;
                 players[currentPlayerNumber + 1].target.Visibility = Visibility.Visible;
+                background.DataContext = players[currentPlayerNumber + 1];
                 return players[currentPlayerNumber + 1];
             }
             else
             {
                 players[0].activeSign.Visibility = Visibility.Visible;
                 players[0].target.Visibility = Visibility.Visible;
+                background.DataContext = players[0];
                 return players[0];
             }
         }
@@ -170,8 +195,8 @@ namespace Canvas_test
             explosion.Stroke = System.Windows.Media.Brushes.Orange;
             explosion.Fill = System.Windows.Media.Brushes.Red;
             AddToBackgroud(explosion);
-            Canvas.SetLeft(explosion, coord.ToInt(ball.X, ball.Y)[0] - explosion.Width / 2);
-            Canvas.SetTop(explosion, coord.ToInt(ball.X, ball.Y)[1] - explosion.Height / 2);
+            Canvas.SetLeft(explosion, coord.ToInt(bullet.X, bullet.Y)[0] - explosion.Width / 2);
+            Canvas.SetTop(explosion, coord.ToInt(bullet.X, bullet.Y)[1] - explosion.Height / 2);
             explosion.Opacity = 1;
             var animation = new DoubleAnimation
             {
@@ -186,24 +211,33 @@ namespace Canvas_test
 
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
-            if (ball == null)
+            if (bullet == null)
             {
 
-                if (e.Key == Key.Space)
+                if (e.Key == Key.Space || e.Key == Key.Enter)
                 {
-                    ball = new Ball(activePlayer.PositionX, activePlayer.PositionY + 1, activePlayer.Velocity, activePlayer.angle, activePlayer.Direction);
-                    line.Points.Clear();
-                    hit = false;
-                    inside = true;
-                    line.Points.Add(coord.ToWindowsPoint(ball.X, ball.Y));
-                    timer.Start();
+                    if (activePlayer.SelectedBullet.BulletCount > 0)
+                    {
+                        bullet = activePlayer.SelectedBullet;
+                        activePlayer.SelectedBullet.BulletCount--;
+                        ListCurrentBullets();
+                        bullet.FireBullet(activePlayer.PositionX, activePlayer.PositionY + 1, activePlayer.Velocity, activePlayer.Angle, activePlayer.Direction);
+                        line.Points.Clear();
+                        hit = false;
+                        inside = true;
+                        line.Points.Add(coord.ToWindowsPoint(bullet.X, bullet.Y));
+                        timer.Start();
+                    }
+                    else
+                    {
+                        MessageBox.Show("No more bullets!");
+                    }
                 }
                 if (e.Key == Key.Up)
                 {
                     if (activePlayer.Velocity < maxV)
                     {
                         activePlayer.Velocity++;
-                        vblock.Text = activePlayer.Velocity.ToString();
                         activePlayer.MoveTarget();
                     }
                 }
@@ -212,22 +246,31 @@ namespace Canvas_test
                     if (activePlayer.Velocity > 0)
                     {
                         activePlayer.Velocity--;
-                        vblock.Text = activePlayer.Velocity.ToString();
                         activePlayer.MoveTarget();
                     }
                 }
                 if (e.Key == Key.Left)
                 {
-                    activePlayer.angle--;
-                    activePlayer.MoveTarget();
+                    if (activePlayer.Angle > -90)
+                    {
+                        activePlayer.Angle -= 2;
+                        activePlayer.MoveTarget();
+                    }
                 }
                 if (e.Key == Key.Right)
                 {
-                    activePlayer.angle++;
-                    activePlayer.MoveTarget();
+                    if (activePlayer.Angle < 90)
+                    {
+                        activePlayer.Angle += 2;
+                        activePlayer.MoveTarget();
+                    }
                 }
                 if (e.Key == Key.A)
                 {
+                    if (activePlayer.Direction == 'r')
+                    {
+                        activePlayer.Direction = 'l';
+                    }
                     if (activePlayer.PositionX > 0)
                     {
                         activePlayer.PositionX--;
@@ -236,14 +279,22 @@ namespace Canvas_test
                 }
                 if (e.Key == Key.D)
                 {
+                    if (activePlayer.Direction == 'l')
+                    {
+                        activePlayer.Direction = 'r';
+                    }
                     if (activePlayer.PositionX < terrainLength)
                     {
                         activePlayer.PositionX++;
                         activePlayer.MoveTank();
                     }
-                } 
+                }
             }
         }
+
+        public delegate void WindGeneratedEventHandler(object sender, WindEventArgs e);
+
+        public event WindGeneratedEventHandler WindGenerated;
 
         private void GenerateWind()
         {
@@ -252,6 +303,15 @@ namespace Canvas_test
             {
                 windBlock.Text = wind.ToString();
             });
+            OnWindGenerated(wind);
+        }
+
+        public virtual void OnWindGenerated(int wind)
+        {
+            if (WindGenerated != null)
+            {
+                WindGenerated(this, new WindEventArgs() { Wind = wind });
+            }
         }
 
         public void AddToBackgroud(UIElement element)
@@ -276,5 +336,15 @@ namespace Canvas_test
         {
             return _brushes[rnd.Next(_brushes.Count)];
         }
+
+        private void BulletSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            activePlayer.SelectedBullet = bulletSelector.SelectedItem as Bullet;
+        }
+    }
+
+    public class WindEventArgs : EventArgs
+    {
+        public int Wind { get; set; }
     }
 }

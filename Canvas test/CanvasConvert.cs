@@ -7,19 +7,23 @@ using System.Windows;
 
 namespace Canvas_test
 {
-    class CanvasConvert
+    public class CanvasConvert
     {
         private double canvasHeigth;
         private double canvasWidth;
-        private double fieldHeigth;
+        private readonly double fieldHeigth;
         private double fieldWidth;
         private double conversionRate;
+
+        public double FieldHeigth { get => fieldHeigth; }
+        public double FieldWidth { get => fieldWidth; }
+
         public CanvasConvert(double heigth, double width, double length)
         {
             canvasHeigth = heigth;
             canvasWidth = width;
             fieldWidth = length;
-            conversionRate = canvasWidth / fieldWidth;
+            conversionRate = canvasWidth / FieldWidth;
             fieldHeigth = canvasHeigth / conversionRate;
         }
         public Point ToWindowsPoint(double x, double y)

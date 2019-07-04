@@ -14,7 +14,7 @@ namespace Canvas_test
     {
         public double[] Height { get; set; }
         CanvasConvert coord;
-        int terrainLength;
+        public int terrainLength;
         Polygon ground;
         Random rnd = new Random();
         public Ground(int length, CanvasConvert cd, Polygon gr)
@@ -45,7 +45,7 @@ namespace Canvas_test
             if (sign == 0) sign = -1;
             int angleCounter = rnd.Next(0, terrainLength / 10);
             int angle = rnd.Next(50);
-            Height[0] = rnd.Next(100, 200);
+            Height[0] = rnd.Next(200, 300);
             for (int i = 1; i <= terrainLength; i++)
             {
                 if (i > signCounter)

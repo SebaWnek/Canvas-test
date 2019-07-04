@@ -7,15 +7,41 @@ using System.Windows.Shapes;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Reflection;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace Canvas_test
 {
-    class Player
+    class Player : INotifyPropertyChanged
     {
+        public Dictionary<Bullet.BulletType, Bullet> Bullets { get; }
+
+        public void AddBullet(Bullet bullet)
+        {
+            if (Bullets.ContainsKey(bullet.Type))
+            {
+                Bullets[bullet.Type].BulletCount += bullet.BulletCount;
+            }
+            else
+            {
+                Bullets.Add(bullet.Type, bullet);
+            }
+        }
+
+        public Bullet SelectedBullet { get; set; }
+
         int HP { get; set; } = 100;
         public double PositionX { get; set; }
         public double PositionY { get; set; }
-        public int angle { get; set; } = 45;
+        public int Angle
+        {
+            get => angle;
+            set
+            {
+                angle = value;
+                NotifyPropertyChanged();
+            }
+        }
         public char Direction { get; set; } = 'r';
         public Rectangle image;
         public Rectangle target;
@@ -26,14 +52,32 @@ namespace Canvas_test
         public string Name { get; set; }
         CanvasConvert coord;
         Ground terrain;
+        private int angle = 45;
+        private int velocity = 20;
 
-        public int Velocity { get; set; } = 20;
-        public int Damage { get; set; } = 40;
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        public int Velocity
+        {
+            get => velocity;
+            set
+            {
+                velocity = value;
+                NotifyPropertyChanged();
+            }
+        }
+
         Brush color { get; set; }
 
+        private void NotifyPropertyChanged([CallerMemberName] String propertyName = "")
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
 
         public Player(int position, string name, System.Windows.Media.Brush col, CanvasConvert cc, Ground tr)
         {
+            Bullets = new Dictionary<Bullet.BulletType, Bullet>();
+
             color = col;
 
             image = new Rectangle();
@@ -105,21 +149,21 @@ namespace Canvas_test
 
         public void MoveTarget()
         {
-            Canvas.SetLeft(target, coord.ToInt(PositionX + GetTargetPosition(angle)[0],
-                PositionY + GetTargetPosition(angle)[1])[0] - 2);
-            Canvas.SetTop(target, coord.ToInt(PositionX + GetTargetPosition(angle)[0],
-                PositionY + GetTargetPosition(angle)[1])[1] - 2);
+            Canvas.SetLeft(target, coord.ToInt(PositionX + GetTargetPosition(Angle)[0],
+                PositionY + GetTargetPosition(Angle)[1])[0] - 2);
+            Canvas.SetTop(target, coord.ToInt(PositionX + GetTargetPosition(Angle)[0],
+                PositionY + GetTargetPosition(Angle)[1])[1] - 2);
         }
 
-        public bool CheckIfAlive(double x, int dmg)
+        public bool CheckIfAlive(double x, int dmg, int dmgRadius)
         {
             double y = terrain.Height[(int)Math.Round(x)];
             double deltaX = Math.Abs(x - PositionX);
             double deltaY = Math.Abs(y - PositionY);
             int distance = (int)Math.Sqrt(deltaX * deltaX + deltaY * deltaY);
-            if(distance <= dmg)
+            if (distance <= dmgRadius)
             {
-                HP -= (dmg - distance);
+                HP -= dmg * (dmgRadius - distance)/dmgRadius;
                 HPLabel.Content = HP;
             }
             if (HP > 0)
