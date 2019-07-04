@@ -29,7 +29,7 @@
                     <ImageBrush ImageSource="pack://siteOfOrigin:,,,/Resources/groundTexture.jpg" Stretch="UniformToFill" AlignmentX="Left" AlignmentY="Bottom"/>
                 </Polygon.Fill>
             </Polygon>
-            <ListBox x:Name="bulletSelector" Width="100" Height="100" Canvas.Top="10" Canvas.Right="10" SelectionChanged="BulletSelector_SelectionChanged"/>
+            <ListBox x:Name="bulletSelector" Width="100" Height="100" Canvas.Top="10" Canvas.Right="10" SelectionChanged="BulletSelector_SelectionChanged" Background="#88FFFFFF"/>
         </Canvas>
     </Grid>
 </Window>
