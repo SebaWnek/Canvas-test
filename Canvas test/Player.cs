@@ -12,7 +12,7 @@ using System.Runtime.CompilerServices;
 
 namespace Canvas_test
 {
-    class Player : INotifyPropertyChanged
+    class Tank : INotifyPropertyChanged
     {
         public Dictionary<Bullet.BulletType, Bullet> Bullets { get; }
 
@@ -29,6 +29,8 @@ namespace Canvas_test
         }
 
         public Bullet SelectedBullet { get; set; }
+
+        public Player player;
 
         int HP { get; set; } = 100;
         public double PositionX { get; set; }
@@ -53,7 +55,7 @@ namespace Canvas_test
         CanvasConvert coord;
         Ground terrain;
         private int angle = 45;
-        private int velocity = 20;
+        private int velocity = 50;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -74,8 +76,20 @@ namespace Canvas_test
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        public Player(int position, string name, System.Windows.Media.Brush col, CanvasConvert cc, Ground tr)
+        public Tank(int position, string name, System.Windows.Media.Brush col, CanvasConvert cc, Ground tr, Player.PlayerType playerType)
         {
+            switch (playerType)
+            {
+                case Player.PlayerType.Human:
+                    player = new Human(this);
+                    break;
+                case Player.PlayerType.Easy:
+                    player = new Easy(this);
+                    break;
+                default:
+                    throw new ArgumentException("wrong player type!");
+            }
+
             Bullets = new Dictionary<Bullet.BulletType, Bullet>();
 
             color = col;
@@ -128,8 +142,8 @@ namespace Canvas_test
             {
                 radAngle = -(90 - angle) * Math.PI / 180;
             }
-            double x = Math.Sin(radAngle) * Velocity;
-            double y = Math.Cos(radAngle) * Velocity;
+            double x = Math.Sin(radAngle) * Velocity / 2;
+            double y = Math.Cos(radAngle) * Velocity / 2;
             return new double[] { x, y };
         }
 
@@ -139,9 +153,9 @@ namespace Canvas_test
             Canvas.SetLeft(image, coord.ToInt(PositionX, PositionY)[0] - 5);
             Canvas.SetTop(image, coord.ToInt(PositionX, PositionY)[1] - 5);
             Canvas.SetLeft(NameLabel, coord.ToInt(PositionX, PositionY)[0] - 25);
-            Canvas.SetTop(NameLabel, coord.ToInt(PositionX, PositionY)[1] + 10);
+            Canvas.SetTop(NameLabel, coord.ToInt(PositionX, PositionY)[1] - 30);
             Canvas.SetLeft(HPLabel, coord.ToInt(PositionX, PositionY)[0] - 15);
-            Canvas.SetTop(HPLabel, coord.ToInt(PositionX, PositionY)[1] + 30);
+            Canvas.SetTop(HPLabel, coord.ToInt(PositionX, PositionY)[1] - 50);
             Canvas.SetLeft(activeSign, coord.ToInt(PositionX, PositionY)[0] - 1);
             Canvas.SetTop(activeSign, coord.ToInt(PositionX, PositionY)[1] - 50);
             MoveTarget();

@@ -75,11 +75,15 @@ namespace Canvas_test
             {
                 if (hitXint - i >= 0 && hitXint - i <= terrainLength)
                 {
-                    tmp = Height[hitXint - i] - medium + (size - i * i / size) + rnd.Next(-1, 2);
-                    if (tmp > 0)
+                    tmp = (size - i * i / size) + rnd.Next(-1, 2);
+                    if (tmp > 0 && Height[hitXint - i] > medium + tmp)
                     {
-                        Height[hitXint - i] -= tmp;
+                        Height[hitXint - i] -= tmp * 2;
                     } 
+                    else if (tmp > 0 && Height[hitXint - i] > medium - tmp)
+                    {
+                        Height[hitXint - i] = medium - tmp;
+                    }
                 }
             }
             HeigthToTerrain();

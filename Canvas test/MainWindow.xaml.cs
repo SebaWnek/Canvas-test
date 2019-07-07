@@ -28,43 +28,67 @@ namespace Canvas_test
     public partial class MainWindow : Window
     {
         System.Timers.Timer timer = new System.Timers.Timer();
-        int timeInterval = 10;
+        static int timeInterval = 30;
         int wind;
+        bool isStarted = false;
         Random rnd = new Random();
         Bullet bullet = null;
         int terrainLength = 1000;
-        int maxV = 50;
+        private int maxV = 100;
         public CanvasConvert coord;
         Ground terrain;
         int playerCount;
-        List<Player> players;
-        List<Player> removeList = new List<Player>();
+        List<Tank> players;
+        List<Tank> removeList = new List<Tank>();
         bool hit = false;
-        bool inside;
-        Player activePlayer;
+        Tank activePlayer;
         private List<System.Windows.Media.Brush> _brushes;
+        List<System.Windows.Point> pointList;
         ObservableCollection<Bullet> currentBullets = new ObservableCollection<Bullet>();
+        int stepsCount = 0;
+        int currentStep = 0;
+        int step = 50;
+        List<Player.PlayerType> playerTypes = new List<Player.PlayerType>();
+
+        public int MaxV { get => maxV; }
 
         public MainWindow()
         {
             InitializeComponent();
+            playerTypes.Add(Player.PlayerType.Human);
+            playerTypes.Add(Player.PlayerType.Easy);
+            playerTypes.Add(Player.PlayerType.Easy);
+            playerTypes.Add(Player.PlayerType.Easy);
+            playerTypes.Add(Player.PlayerType.Easy);
+            playerTypes.Add(Player.PlayerType.Easy);
+            playerTypes.Add(Player.PlayerType.Easy);
+            playerTypes.Add(Player.PlayerType.Easy);
+            playerTypes.Add(Player.PlayerType.Easy);
+            playerTypes.Add(Player.PlayerType.Easy);
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            timer.Elapsed += Timer_Elapsed;
+            timer.Interval = timeInterval;
+        }
+
+        private void GenerateNewGame()
+        {
+            isStarted = true;
             InitBrushes();
             coord = new CanvasConvert(background.ActualHeight, background.ActualWidth, terrainLength);
             terrain = new Ground(terrainLength, coord, ground);
-            playerCount = 2;
-            players = new List<Player>();
+            players = new List<Tank>();
             for (int i = 0; i < playerCount; i++)
             {
-                players.Add(new Player(rnd.Next(10, terrainLength - 10), "player" + (i + 1).ToString(), GetRandomBrush(), coord, terrain));
+                players.Add(new Tank(rnd.Next(10, terrainLength - 10), playerTypes[i].ToString() + (i + 1).ToString(), GetRandomBrush(), coord, terrain, playerTypes[i]));
                 players[i].MoveTank();
                 players[i].MoveTarget();
                 players[i].AddBullet(new Bullet(Bullet.BulletType.SmallBullet, 99));
                 players[i].AddBullet(new Bullet(Bullet.BulletType.BigBullet, 10));
                 players[i].AddBullet(new Bullet(Bullet.BulletType.Nuclear, 1));
+                players[i].AddBullet(new Bullet(Bullet.BulletType.Sniper, 5));
                 players[i].SelectedBullet = players[i].Bullets[Bullet.BulletType.SmallBullet];
             }
             activePlayer = players[0];
@@ -72,53 +96,55 @@ namespace Canvas_test
             bulletSelector.ItemsSource = currentBullets;
             activePlayer.activeSign.Visibility = Visibility.Visible;
             activePlayer.target.Visibility = Visibility.Visible;
-            timer.Elapsed += Timer_Elapsed;
-            timer.Interval = timeInterval;
             Sky.GenerateClouds(10);
             GenerateWind();
             ListCurrentBullets();
+            AiMoveAsync();
         }
 
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            bullet.CalculateNewPosition(wind, timeInterval);
             Dispatcher.InvokeAsync(() =>
             {
-                xBlock.Text = bullet.X.ToString();
-                yBlock.Text = bullet.Y.ToString();
-                vxBlock.Text = bullet.SpeedX.ToString();
-                vyBlock.Text = bullet.SpeedY.ToString();
-                line.Points.Add(coord.ToWindowsPoint(bullet.X, bullet.Y));
-                hit = terrain.CheckHit(bullet.X, bullet.Y);
-                inside = bullet.Y >= 0;
-                if (hit == true)
+                line.Points.Add(pointList[currentStep]);
+                currentStep += step;
+                if (currentStep >= stepsCount)
                 {
                     timer.Stop();
-                    GenerateWind();
-                    terrain.DestroyTerrain(bullet.X, bullet.ExplosionDestroyDistance);
-                    activePlayer.MoveTank();
-                    activePlayer.MoveTarget();
-                    ShowExplosion(bullet.ExplosionRadius);
-                    foreach (Player player in players)
-                    {
-                        player.MoveTank();
-                        player.MoveTarget();
-                    }
-                    CheckDamage(bullet.X);
-                    bullet = null;
-                    activePlayer = NextPlayer();
-                    ListCurrentBullets();
-                }
-                if (inside == false)
-                {
-                    timer.Stop();
-                    GenerateWind();
-                    bullet = null;
-
-                    activePlayer = NextPlayer();
-                    ListCurrentBullets();
+                    SimulationFinished();
                 }
             });
+        }
+
+        private void SimulationFinished()
+        {
+            if (hit == true)
+            {
+                line.Points.Add(pointList[stepsCount - 1]);
+                GenerateWind();
+                terrain.DestroyTerrain(bullet.X, bullet.ExplosionDestroyDistance);
+                activePlayer.MoveTank();
+                activePlayer.MoveTarget();
+                ShowExplosion(bullet.ExplosionRadius);
+                foreach (Tank player in players)
+                {
+                    player.MoveTank();
+                    player.MoveTarget();
+                }
+                CheckDamage(bullet.X);
+                bullet = null;
+                activePlayer = NextPlayer();
+                ListCurrentBullets();
+                AiMoveAsync();
+            }
+            else
+            {
+                GenerateWind();
+                bullet = null;
+                activePlayer = NextPlayer();
+                ListCurrentBullets();
+                AiMoveAsync();
+            }
         }
 
         private void ListCurrentBullets()
@@ -136,7 +162,7 @@ namespace Canvas_test
         private void CheckDamage(double x)
         {
             bool isAlive;
-            foreach (Player player in players)
+            foreach (Tank player in players)
             {
                 isAlive = player.CheckIfAlive(x, bullet.Damage, bullet.ExplosionDestroyDistance);
                 if (!isAlive)
@@ -148,7 +174,7 @@ namespace Canvas_test
             }
             if (removeList.Count > 0)
             {
-                foreach (Player player in removeList)
+                foreach (Tank player in removeList)
                 {
                     players.Remove(player);
                 }
@@ -156,17 +182,19 @@ namespace Canvas_test
             removeList.Clear();
             if (players.Count == 1)
             {
+                isStarted = false;
                 MessageBox.Show($"{players.First().Name} has won!");
-                Environment.Exit(1);
+                mainMenu.Visibility = Visibility.Visible;
             }
             if (players.Count == 0)
             {
+                isStarted = false;
                 MessageBox.Show("Tie!");
-                Environment.Exit(1);
+                mainMenu.Visibility = Visibility.Visible;
             }
         }
 
-        private Player NextPlayer()
+        private Tank NextPlayer()
         {
             activePlayer.activeSign.Visibility = Visibility.Hidden;
             activePlayer.target.Visibility = Visibility.Hidden;
@@ -176,6 +204,7 @@ namespace Canvas_test
                 players[currentPlayerNumber + 1].activeSign.Visibility = Visibility.Visible;
                 players[currentPlayerNumber + 1].target.Visibility = Visibility.Visible;
                 background.DataContext = players[currentPlayerNumber + 1];
+                activePlayer.SelectedBullet = players[currentPlayerNumber + 1].Bullets[Bullet.BulletType.SmallBullet];
                 return players[currentPlayerNumber + 1];
             }
             else
@@ -183,8 +212,37 @@ namespace Canvas_test
                 players[0].activeSign.Visibility = Visibility.Visible;
                 players[0].target.Visibility = Visibility.Visible;
                 background.DataContext = players[0];
+                activePlayer.SelectedBullet = players[0].Bullets[Bullet.BulletType.SmallBullet];
                 return players[0];
             }
+        }
+
+        private async Task AiMoveAsync()
+        {
+            int[] aiCoords;
+            if (activePlayer.player.Type != Player.PlayerType.Human)
+            {
+                aiCoords = activePlayer.player.ChooseParameters();
+                activePlayer.Velocity = aiCoords[1];
+                activePlayer.Angle = aiCoords[2];
+                if (aiCoords[0] == 0)
+                {
+                    activePlayer.Direction = 'r';
+                }
+                else
+                {
+                    activePlayer.Direction = 'l';
+                }
+                activePlayer.MoveTank();
+                activePlayer.MoveTarget();
+                await PutTaskDelay();
+                Shot();
+            }
+        }
+
+        async Task PutTaskDelay()
+        {
+            await Task.Delay(rnd.Next(500,1501));
         }
 
         private void ShowExplosion(int radius)
@@ -211,22 +269,14 @@ namespace Canvas_test
 
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
-            if (bullet == null)
+            if (bullet == null && isStarted && activePlayer.player.Type == Player.PlayerType.Human)
             {
 
                 if (e.Key == Key.Space || e.Key == Key.Enter)
                 {
                     if (activePlayer.SelectedBullet.BulletCount > 0)
                     {
-                        bullet = activePlayer.SelectedBullet;
-                        activePlayer.SelectedBullet.BulletCount--;
-                        ListCurrentBullets();
-                        bullet.FireBullet(activePlayer.PositionX, activePlayer.PositionY + 1, activePlayer.Velocity, activePlayer.Angle, activePlayer.Direction);
-                        line.Points.Clear();
-                        hit = false;
-                        inside = true;
-                        line.Points.Add(coord.ToWindowsPoint(bullet.X, bullet.Y));
-                        timer.Start();
+                        Shot();
                     }
                     else
                     {
@@ -235,9 +285,9 @@ namespace Canvas_test
                 }
                 if (e.Key == Key.Up)
                 {
-                    if (activePlayer.Velocity < maxV)
+                    if (activePlayer.Velocity < MaxV)
                     {
-                        activePlayer.Velocity++;
+                        activePlayer.Velocity += 4;
                         activePlayer.MoveTarget();
                     }
                 }
@@ -245,7 +295,7 @@ namespace Canvas_test
                 {
                     if (activePlayer.Velocity > 0)
                     {
-                        activePlayer.Velocity--;
+                        activePlayer.Velocity -= 4;
                         activePlayer.MoveTarget();
                     }
                 }
@@ -271,7 +321,7 @@ namespace Canvas_test
                     {
                         activePlayer.Direction = 'l';
                     }
-                    if (activePlayer.PositionX > 0)
+                    if (activePlayer.PositionX > 0 && Math.Abs(terrain.Height[(int)activePlayer.PositionX] - terrain.Height[(int)activePlayer.PositionX - 1]) < 5)
                     {
                         activePlayer.PositionX--;
                         activePlayer.MoveTank();
@@ -283,13 +333,28 @@ namespace Canvas_test
                     {
                         activePlayer.Direction = 'r';
                     }
-                    if (activePlayer.PositionX < terrainLength)
+                    if (activePlayer.PositionX < terrainLength && Math.Abs(terrain.Height[(int)activePlayer.PositionX] - terrain.Height[(int)activePlayer.PositionX + 1]) < 5)
                     {
                         activePlayer.PositionX++;
                         activePlayer.MoveTank();
                     }
                 }
+                e.Handled = true;
             }
+        }
+
+        private void Shot()
+        {
+            bullet = activePlayer.SelectedBullet;
+            activePlayer.SelectedBullet.BulletCount--;
+            ListCurrentBullets();
+            bullet.FireBullet(activePlayer.PositionX, activePlayer.PositionY + 1, activePlayer.Velocity, activePlayer.Angle, activePlayer.Direction);
+            line.Points.Clear();
+            hit = false;
+            pointList = bullet.CalulateShot(coord, terrain, wind, out hit);
+            stepsCount = pointList.Count;
+            currentStep = 0;
+            timer.Start();
         }
 
         public delegate void WindGeneratedEventHandler(object sender, WindEventArgs e);
@@ -340,6 +405,24 @@ namespace Canvas_test
         private void BulletSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             activePlayer.SelectedBullet = bulletSelector.SelectedItem as Bullet;
+        }
+
+        private void StartButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                playerCount = int.Parse(playerCountBox.Text);
+                if (playerCount > 10)
+                {
+                    throw new ArgumentException("Too many players!");
+                }
+                mainMenu.Visibility = Visibility.Collapsed;
+                GenerateNewGame();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Wrong player count!" + ex.Message);
+            }
         }
     }
 

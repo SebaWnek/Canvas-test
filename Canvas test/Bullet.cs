@@ -12,7 +12,8 @@ namespace Canvas_test
         {
             SmallBullet,
             BigBullet,
-            Nuclear
+            Nuclear,
+            Sniper
         }
         public BulletType Type { get; set; }
         public int Damage { get; set; }
@@ -20,12 +21,12 @@ namespace Canvas_test
         public int ExplosionDestroyDistance { get; set; }
         public int BulletCount { get; set; }
 
-        int animationSpeed { get; set; } = 5;
         private readonly double gravity = 9.81;
         public double X { get; set; }
         public double Y { get; set; }
         public double SpeedX { get; set; }
         public double SpeedY { get; set; }
+        public double SpeedMultiplier { get; set; }
 
         public override string ToString()
         {
@@ -42,16 +43,25 @@ namespace Canvas_test
                     Damage = 10;
                     ExplosionRadius = 80;
                     ExplosionDestroyDistance = 20;
+                    SpeedMultiplier = 1;
                     break;
                 case BulletType.BigBullet:
                     Damage = 40;
                     ExplosionRadius = 160;
                     ExplosionDestroyDistance = 50;
+                    SpeedMultiplier = 1;
                     break;
                 case BulletType.Nuclear:
                     Damage = 100;
                     ExplosionRadius = 200;
                     ExplosionDestroyDistance = 150;
+                    SpeedMultiplier = 0.5;
+                    break;
+                case BulletType.Sniper:
+                    Damage = 200;
+                    ExplosionRadius = 30;
+                    ExplosionDestroyDistance = 10;
+                    SpeedMultiplier = 10;
                     break;
                 default:
                     throw new Exception("Wrong bullet type");
@@ -75,10 +85,33 @@ namespace Canvas_test
         }
         public void CalculateNewPosition(double wind, int timeInterval)
         {
-            X += animationSpeed * SpeedX * timeInterval / 1000;
-            Y += animationSpeed * SpeedY * timeInterval / 1000;
+            X += SpeedMultiplier * SpeedX * timeInterval / 1000;
+            Y += SpeedMultiplier * SpeedY * timeInterval / 1000;
             SpeedX += wind * timeInterval / 1000;
             SpeedY -= gravity * timeInterval / 1000;
+        }
+
+        public List<System.Windows.Point> CalulateShot(CanvasConvert coord, Ground terrain, int wind, out bool hit)
+        {
+            bool terrainHit = false;
+            bool overGround = true;
+            bool inside = true;
+            int timeInterval = 2;
+            List<System.Windows.Point> result = new List<System.Windows.Point>();
+            result.Add(coord.ToWindowsPoint(X, Y));
+            while (!terrainHit && overGround)
+            {
+                inside = X >= -1 && X <= terrain.terrainLength + 1;
+                overGround = Y >= 0;
+                CalculateNewPosition(wind, timeInterval);
+                if (inside)
+                {
+                    result.Add(coord.ToWindowsPoint(X, Y)); 
+                }
+                terrainHit = terrain.CheckHit(X, Y);
+            }
+            hit = terrainHit;
+            return result;
         }
     }
 }
