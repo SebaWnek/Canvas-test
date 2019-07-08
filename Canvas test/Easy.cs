@@ -12,7 +12,6 @@ namespace Canvas_test
 {
     class Easy : Player
     {
-        MainWindow main = Application.Current.MainWindow as MainWindow;
         public Easy(Tank player) : base(player)
         {
             Type = PlayerType.Easy;
@@ -31,7 +30,7 @@ namespace Canvas_test
             throw new NotImplementedException();
         }
 
-        protected override Bullet.BulletType ChooseBullet()
+        protected override Bullet ChooseBullet()
         {
             throw new NotImplementedException();
         }

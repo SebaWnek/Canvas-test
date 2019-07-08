@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Canvas_test
 {
-    class Bullet
+    public class Bullet
     {
         public enum BulletType
         {

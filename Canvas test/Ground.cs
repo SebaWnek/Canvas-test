@@ -10,7 +10,7 @@ using System.Windows.Shapes;
 
 namespace Canvas_test
 {
-    class Ground
+    public class Ground
     {
         public double[] Height { get; set; }
         CanvasConvert coord;
@@ -86,7 +86,16 @@ namespace Canvas_test
                     }
                 }
             }
+            LevelTerrain();
             HeigthToTerrain();
+        }
+
+        private void LevelTerrain()
+        {
+            for (int i = 0; i < terrainLength; i++)
+            {
+                if (Height[i] <= 0) Height[i] = 1;
+            }
         }
 
         public bool CheckHit(double x, double y)

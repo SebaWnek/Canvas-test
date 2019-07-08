@@ -56,7 +56,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="AI.cs" />
+    <Compile Include="Medium.cs" />
+    <Compile Include="Player.cs" />
     <Compile Include="Easy.cs" />
     <Compile Include="Human.cs" />
     <Compile Include="Sky.cs" />
@@ -78,7 +79,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Player.cs" />
+    <Compile Include="Tank.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>

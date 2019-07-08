@@ -38,7 +38,7 @@ namespace Canvas_test
         public CanvasConvert coord;
         Ground terrain;
         int playerCount;
-        List<Tank> players;
+        public List<Tank> Players => players;
         List<Tank> removeList = new List<Tank>();
         bool hit = false;
         Tank activePlayer;
@@ -49,22 +49,24 @@ namespace Canvas_test
         int currentStep = 0;
         int step = 50;
         List<Player.PlayerType> playerTypes = new List<Player.PlayerType>();
+        private List<Tank> players;
 
         public int MaxV { get => maxV; }
+        public int Wind { get => wind; }
 
         public MainWindow()
         {
             InitializeComponent();
-            playerTypes.Add(Player.PlayerType.Human);
-            playerTypes.Add(Player.PlayerType.Easy);
-            playerTypes.Add(Player.PlayerType.Easy);
-            playerTypes.Add(Player.PlayerType.Easy);
-            playerTypes.Add(Player.PlayerType.Easy);
-            playerTypes.Add(Player.PlayerType.Easy);
-            playerTypes.Add(Player.PlayerType.Easy);
-            playerTypes.Add(Player.PlayerType.Easy);
-            playerTypes.Add(Player.PlayerType.Easy);
-            playerTypes.Add(Player.PlayerType.Easy);
+            playerTypes.Add(Player.PlayerType.Medium);
+            playerTypes.Add(Player.PlayerType.Medium);
+            playerTypes.Add(Player.PlayerType.Medium);
+            playerTypes.Add(Player.PlayerType.Medium);
+            playerTypes.Add(Player.PlayerType.Medium);
+            playerTypes.Add(Player.PlayerType.Medium);
+            playerTypes.Add(Player.PlayerType.Medium);
+            playerTypes.Add(Player.PlayerType.Medium);
+            playerTypes.Add(Player.PlayerType.Medium);
+            playerTypes.Add(Player.PlayerType.Medium);
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -73,7 +75,7 @@ namespace Canvas_test
             timer.Interval = timeInterval;
         }
 
-        private void GenerateNewGame()
+        private async void GenerateNewGame()
         {
             isStarted = true;
             InitBrushes();
@@ -82,16 +84,16 @@ namespace Canvas_test
             players = new List<Tank>();
             for (int i = 0; i < playerCount; i++)
             {
-                players.Add(new Tank(rnd.Next(10, terrainLength - 10), playerTypes[i].ToString() + (i + 1).ToString(), GetRandomBrush(), coord, terrain, playerTypes[i]));
-                players[i].MoveTank();
-                players[i].MoveTarget();
-                players[i].AddBullet(new Bullet(Bullet.BulletType.SmallBullet, 99));
-                players[i].AddBullet(new Bullet(Bullet.BulletType.BigBullet, 10));
-                players[i].AddBullet(new Bullet(Bullet.BulletType.Nuclear, 1));
-                players[i].AddBullet(new Bullet(Bullet.BulletType.Sniper, 5));
-                players[i].SelectedBullet = players[i].Bullets[Bullet.BulletType.SmallBullet];
+                Players.Add(new Tank(rnd.Next(10, terrainLength - 10), playerTypes[i].ToString() + (i + 1).ToString(), GetRandomBrush(), coord, terrain, playerTypes[i]));
+                Players[i].MoveTank();
+                Players[i].MoveTarget();
+                Players[i].AddBullet(new Bullet(Bullet.BulletType.SmallBullet, 99));
+                Players[i].AddBullet(new Bullet(Bullet.BulletType.BigBullet, 10));
+                Players[i].AddBullet(new Bullet(Bullet.BulletType.Nuclear, 1));
+                Players[i].AddBullet(new Bullet(Bullet.BulletType.Sniper, 5));
+                Players[i].SelectedBullet = Players[i].Bullets[Bullet.BulletType.SmallBullet];
             }
-            activePlayer = players[0];
+            activePlayer = Players[0];
             background.DataContext = activePlayer;
             bulletSelector.ItemsSource = currentBullets;
             activePlayer.activeSign.Visibility = Visibility.Visible;
@@ -99,7 +101,7 @@ namespace Canvas_test
             Sky.GenerateClouds(10);
             GenerateWind();
             ListCurrentBullets();
-            AiMoveAsync();
+            await AiMoveAsync();
         }
 
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
@@ -116,7 +118,7 @@ namespace Canvas_test
             });
         }
 
-        private void SimulationFinished()
+        private async void SimulationFinished()
         {
             if (hit == true)
             {
@@ -126,7 +128,7 @@ namespace Canvas_test
                 activePlayer.MoveTank();
                 activePlayer.MoveTarget();
                 ShowExplosion(bullet.ExplosionRadius);
-                foreach (Tank player in players)
+                foreach (Tank player in Players)
                 {
                     player.MoveTank();
                     player.MoveTarget();
@@ -135,7 +137,7 @@ namespace Canvas_test
                 bullet = null;
                 activePlayer = NextPlayer();
                 ListCurrentBullets();
-                AiMoveAsync();
+                await AiMoveAsync();
             }
             else
             {
@@ -143,7 +145,7 @@ namespace Canvas_test
                 bullet = null;
                 activePlayer = NextPlayer();
                 ListCurrentBullets();
-                AiMoveAsync();
+                await AiMoveAsync();
             }
         }
 
@@ -162,7 +164,7 @@ namespace Canvas_test
         private void CheckDamage(double x)
         {
             bool isAlive;
-            foreach (Tank player in players)
+            foreach (Tank player in Players)
             {
                 isAlive = player.CheckIfAlive(x, bullet.Damage, bullet.ExplosionDestroyDistance);
                 if (!isAlive)
@@ -176,17 +178,17 @@ namespace Canvas_test
             {
                 foreach (Tank player in removeList)
                 {
-                    players.Remove(player);
+                    Players.Remove(player);
                 }
             }
             removeList.Clear();
-            if (players.Count == 1)
+            if (Players.Count == 1)
             {
                 isStarted = false;
-                MessageBox.Show($"{players.First().Name} has won!");
+                MessageBox.Show($"{Players.First().Name} has won!");
                 mainMenu.Visibility = Visibility.Visible;
             }
-            if (players.Count == 0)
+            if (Players.Count == 0)
             {
                 isStarted = false;
                 MessageBox.Show("Tie!");
@@ -198,22 +200,22 @@ namespace Canvas_test
         {
             activePlayer.activeSign.Visibility = Visibility.Hidden;
             activePlayer.target.Visibility = Visibility.Hidden;
-            int currentPlayerNumber = players.IndexOf(activePlayer);
+            int currentPlayerNumber = Players.IndexOf(activePlayer);
             if (currentPlayerNumber + 1 < playerCount)
             {
-                players[currentPlayerNumber + 1].activeSign.Visibility = Visibility.Visible;
-                players[currentPlayerNumber + 1].target.Visibility = Visibility.Visible;
-                background.DataContext = players[currentPlayerNumber + 1];
-                activePlayer.SelectedBullet = players[currentPlayerNumber + 1].Bullets[Bullet.BulletType.SmallBullet];
-                return players[currentPlayerNumber + 1];
+                Players[currentPlayerNumber + 1].activeSign.Visibility = Visibility.Visible;
+                Players[currentPlayerNumber + 1].target.Visibility = Visibility.Visible;
+                background.DataContext = Players[currentPlayerNumber + 1];
+                activePlayer.SelectedBullet = Players[currentPlayerNumber + 1].Bullets[Bullet.BulletType.SmallBullet];
+                return Players[currentPlayerNumber + 1];
             }
             else
             {
-                players[0].activeSign.Visibility = Visibility.Visible;
-                players[0].target.Visibility = Visibility.Visible;
-                background.DataContext = players[0];
-                activePlayer.SelectedBullet = players[0].Bullets[Bullet.BulletType.SmallBullet];
-                return players[0];
+                Players[0].activeSign.Visibility = Visibility.Visible;
+                Players[0].target.Visibility = Visibility.Visible;
+                background.DataContext = Players[0];
+                activePlayer.SelectedBullet = Players[0].Bullets[Bullet.BulletType.SmallBullet];
+                return Players[0];
             }
         }
 
@@ -242,7 +244,7 @@ namespace Canvas_test
 
         async Task PutTaskDelay()
         {
-            await Task.Delay(rnd.Next(500,1501));
+            await Task.Delay(rnd.Next(500, 1501));
         }
 
         private void ShowExplosion(int radius)
@@ -351,7 +353,7 @@ namespace Canvas_test
             bullet.FireBullet(activePlayer.PositionX, activePlayer.PositionY + 1, activePlayer.Velocity, activePlayer.Angle, activePlayer.Direction);
             line.Points.Clear();
             hit = false;
-            pointList = bullet.CalulateShot(coord, terrain, wind, out hit);
+            pointList = bullet.CalulateShot(coord, terrain, Wind, out hit);
             stepsCount = pointList.Count;
             currentStep = 0;
             timer.Start();
@@ -366,9 +368,9 @@ namespace Canvas_test
             wind = rnd.Next(-5, 6);
             Dispatcher.Invoke(() =>
             {
-                windBlock.Text = wind.ToString();
+                windBlock.Text = Wind.ToString();
             });
-            OnWindGenerated(wind);
+            OnWindGenerated(Wind);
         }
 
         public virtual void OnWindGenerated(int wind)

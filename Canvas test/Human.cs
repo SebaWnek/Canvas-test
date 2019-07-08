@@ -9,7 +9,7 @@ namespace Canvas_test
             throw new NotImplementedException();
         }
 
-        protected override Bullet.BulletType ChooseBullet()
+        protected override Bullet ChooseBullet()
         {
             throw new NotImplementedException();
         }
