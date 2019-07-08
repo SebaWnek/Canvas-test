@@ -56,6 +56,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Hard.cs" />
     <Compile Include="Medium.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="Easy.cs" />

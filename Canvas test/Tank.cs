@@ -32,7 +32,7 @@ namespace Canvas_test
 
         public Player player;
 
-        int HP { get; set; } = 100;
+        public int HP { get; set; } = 100;
         public double PositionX { get; set; }
         public double PositionY { get; set; }
         public int Angle
@@ -55,11 +55,11 @@ namespace Canvas_test
         CanvasConvert coord;
         Ground terrain;
         private int angle = 45;
-        private int velocity = 50;
+        private double velocity = 50;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public int Velocity
+        public double Velocity
         {
             get => velocity;
             set
@@ -88,6 +88,9 @@ namespace Canvas_test
                     break;
                 case Player.PlayerType.Medium:
                     player = new Medium(this);
+                    break;
+                case Player.PlayerType.Hard:
+                    player = new Hard(this);
                     break;
                 default:
                     throw new ArgumentException("wrong player type!");

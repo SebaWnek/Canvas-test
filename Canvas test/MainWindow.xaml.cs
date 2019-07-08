@@ -53,20 +53,21 @@ namespace Canvas_test
 
         public int MaxV { get => maxV; }
         public int Wind { get => wind; }
+        public Ground Terrain { get => terrain; }
 
         public MainWindow()
         {
             InitializeComponent();
-            playerTypes.Add(Player.PlayerType.Medium);
-            playerTypes.Add(Player.PlayerType.Medium);
-            playerTypes.Add(Player.PlayerType.Medium);
-            playerTypes.Add(Player.PlayerType.Medium);
-            playerTypes.Add(Player.PlayerType.Medium);
-            playerTypes.Add(Player.PlayerType.Medium);
-            playerTypes.Add(Player.PlayerType.Medium);
-            playerTypes.Add(Player.PlayerType.Medium);
-            playerTypes.Add(Player.PlayerType.Medium);
-            playerTypes.Add(Player.PlayerType.Medium);
+            playerTypes.Add(Player.PlayerType.Hard);
+            playerTypes.Add(Player.PlayerType.Hard);
+            playerTypes.Add(Player.PlayerType.Hard);
+            playerTypes.Add(Player.PlayerType.Hard);
+            playerTypes.Add(Player.PlayerType.Hard);
+            playerTypes.Add(Player.PlayerType.Hard);
+            playerTypes.Add(Player.PlayerType.Hard);
+            playerTypes.Add(Player.PlayerType.Hard);
+            playerTypes.Add(Player.PlayerType.Hard);
+            playerTypes.Add(Player.PlayerType.Hard);
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -84,12 +85,12 @@ namespace Canvas_test
             players = new List<Tank>();
             for (int i = 0; i < playerCount; i++)
             {
-                Players.Add(new Tank(rnd.Next(10, terrainLength - 10), playerTypes[i].ToString() + (i + 1).ToString(), GetRandomBrush(), coord, terrain, playerTypes[i]));
+                Players.Add(new Tank(rnd.Next(10, terrainLength - 10), playerTypes[i].ToString() + (i + 1).ToString(), GetRandomBrush(), coord, Terrain, playerTypes[i]));
                 Players[i].MoveTank();
                 Players[i].MoveTarget();
                 Players[i].AddBullet(new Bullet(Bullet.BulletType.SmallBullet, 99));
                 Players[i].AddBullet(new Bullet(Bullet.BulletType.BigBullet, 10));
-                Players[i].AddBullet(new Bullet(Bullet.BulletType.Nuclear, 1));
+                Players[i].AddBullet(new Bullet(Bullet.BulletType.Nuclear, 0));
                 Players[i].AddBullet(new Bullet(Bullet.BulletType.Sniper, 5));
                 Players[i].SelectedBullet = Players[i].Bullets[Bullet.BulletType.SmallBullet];
             }
@@ -124,7 +125,7 @@ namespace Canvas_test
             {
                 line.Points.Add(pointList[stepsCount - 1]);
                 GenerateWind();
-                terrain.DestroyTerrain(bullet.X, bullet.ExplosionDestroyDistance);
+                Terrain.DestroyTerrain(bullet.X, bullet.ExplosionDestroyDistance);
                 activePlayer.MoveTank();
                 activePlayer.MoveTarget();
                 ShowExplosion(bullet.ExplosionRadius);
@@ -221,12 +222,12 @@ namespace Canvas_test
 
         private async Task AiMoveAsync()
         {
-            int[] aiCoords;
+            double[] aiCoords;
             if (activePlayer.player.Type != Player.PlayerType.Human)
             {
                 aiCoords = activePlayer.player.ChooseParameters();
                 activePlayer.Velocity = aiCoords[1];
-                activePlayer.Angle = aiCoords[2];
+                activePlayer.Angle = (int)(Math.Round(aiCoords[2]));
                 if (aiCoords[0] == 0)
                 {
                     activePlayer.Direction = 'r';
@@ -323,7 +324,7 @@ namespace Canvas_test
                     {
                         activePlayer.Direction = 'l';
                     }
-                    if (activePlayer.PositionX > 0 && Math.Abs(terrain.Height[(int)activePlayer.PositionX] - terrain.Height[(int)activePlayer.PositionX - 1]) < 5)
+                    if (activePlayer.PositionX > 0 && Math.Abs(Terrain.Height[(int)activePlayer.PositionX] - Terrain.Height[(int)activePlayer.PositionX - 1]) < 5)
                     {
                         activePlayer.PositionX--;
                         activePlayer.MoveTank();
@@ -335,7 +336,7 @@ namespace Canvas_test
                     {
                         activePlayer.Direction = 'r';
                     }
-                    if (activePlayer.PositionX < terrainLength && Math.Abs(terrain.Height[(int)activePlayer.PositionX] - terrain.Height[(int)activePlayer.PositionX + 1]) < 5)
+                    if (activePlayer.PositionX < terrainLength && Math.Abs(Terrain.Height[(int)activePlayer.PositionX] - Terrain.Height[(int)activePlayer.PositionX + 1]) < 5)
                     {
                         activePlayer.PositionX++;
                         activePlayer.MoveTank();
@@ -353,7 +354,7 @@ namespace Canvas_test
             bullet.FireBullet(activePlayer.PositionX, activePlayer.PositionY + 1, activePlayer.Velocity, activePlayer.Angle, activePlayer.Direction);
             line.Points.Clear();
             hit = false;
-            pointList = bullet.CalulateShot(coord, terrain, Wind, out hit);
+            pointList = bullet.CalulateShot(coord, Terrain, Wind, out hit);
             stepsCount = pointList.Count;
             currentStep = 0;
             timer.Start();

@@ -25,10 +25,9 @@ namespace Canvas_test
         protected Tank player;
         protected Tank target;
 
-        public abstract int[] ChooseParameters();
+        public abstract double[] ChooseParameters();
         protected abstract Bullet ChooseBullet();
         protected abstract Tank ChooseTarget();
-        protected abstract void CheckLineOfSight();
 
         public Player(Tank player)
         {

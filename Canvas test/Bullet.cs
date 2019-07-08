@@ -80,13 +80,13 @@ namespace Canvas_test
             {
                 radAngle = (-180 - angle) * Math.PI / 180;
             }
-            SpeedX = Math.Cos(radAngle) * speed;
-            SpeedY = Math.Sin(radAngle) * speed;
+            SpeedX = Math.Cos(radAngle) * speed * SpeedMultiplier;
+            SpeedY = Math.Sin(radAngle) * speed * SpeedMultiplier;
         }
         public void CalculateNewPosition(double wind, int timeInterval)
         {
-            X += SpeedMultiplier * SpeedX * timeInterval / 1000;
-            Y += SpeedMultiplier * SpeedY * timeInterval / 1000;
+            X += SpeedX * timeInterval / 1000;
+            Y += SpeedY * timeInterval / 1000;
             SpeedX += wind * timeInterval / 1000;
             SpeedY -= gravity * timeInterval / 1000;
         }

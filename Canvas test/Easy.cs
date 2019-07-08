@@ -17,17 +17,12 @@ namespace Canvas_test
             Type = PlayerType.Easy;
         }
 
-        public override int[] ChooseParameters()
+        public override double[] ChooseParameters()
         {
             int direction = random.Next(2);
             int power = random.Next(20, main.MaxV + 1);
             int angle = random.Next(20, 91);
-            return new int[] { direction, power, angle };
-        }
-
-        protected override void CheckLineOfSight()
-        {
-            throw new NotImplementedException();
+            return new double[] { direction, power, angle };
         }
 
         protected override Bullet ChooseBullet()

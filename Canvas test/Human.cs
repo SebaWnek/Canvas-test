@@ -4,17 +4,13 @@ namespace Canvas_test
 {
     class Human : Player
     {
-        protected override void CheckLineOfSight()
-        {
-            throw new NotImplementedException();
-        }
 
         protected override Bullet ChooseBullet()
         {
             throw new NotImplementedException();
         }
 
-        public override int[] ChooseParameters()
+        public override double[] ChooseParameters()
         {
             throw new NotImplementedException();
         }

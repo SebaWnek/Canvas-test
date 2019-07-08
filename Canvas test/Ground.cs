@@ -64,6 +64,11 @@ namespace Canvas_test
                     Height[i] = 0;
                 }
             }
+
+            //for(int i = 0; i < terrainLength; i++)
+            //{
+            //    Height[i] = Math.Abs(i-terrainLength/2);
+            //}
         }
 
         public void DestroyTerrain(double hitX, int size)

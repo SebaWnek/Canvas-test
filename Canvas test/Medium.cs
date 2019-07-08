@@ -15,7 +15,7 @@ namespace Canvas_test
         {
             Type = PlayerType.Easy;
         }
-        public override int[] ChooseParameters()
+        public override double[] ChooseParameters()
         {
             target = ChooseTarget();
             CalclulateRelativeCoordinates();
@@ -32,12 +32,7 @@ namespace Canvas_test
             power = power + windDirection * (int)(windCoefficient * power);
             if (power > 100) power = 100;
             if (power <= 0) power = 10;
-            return new int[] { direction, power, angle };
-        }
-
-        protected override void CheckLineOfSight()
-        {
-            throw new NotImplementedException();
+            return new double[] { direction, power, angle };
         }
 
         protected override Bullet ChooseBullet()
