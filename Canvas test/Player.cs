@@ -27,7 +27,6 @@ namespace Canvas_test
 
         public abstract double[] ChooseParameters();
         protected abstract Bullet ChooseBullet();
-        protected abstract Tank ChooseTarget();
 
         public Player(Tank player)
         {

@@ -29,10 +29,5 @@ namespace Canvas_test
         {
             throw new NotImplementedException();
         }
-
-        protected override Tank ChooseTarget()
-        {
-            throw new NotImplementedException();
-        }
     }
 }

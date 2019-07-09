@@ -15,11 +15,6 @@ namespace Canvas_test
             throw new NotImplementedException();
         }
 
-        protected override Tank ChooseTarget()
-        {
-            throw new NotImplementedException();
-        }
-
         public Human(Tank player) : base(player)
         {
             Type = PlayerType.Human;

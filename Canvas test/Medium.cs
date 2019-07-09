@@ -48,7 +48,7 @@ namespace Canvas_test
             }
         }
 
-        protected override Tank ChooseTarget()
+        protected Tank ChooseTarget()
         {
             targets.Clear();
             foreach(Tank tank in main.Players)

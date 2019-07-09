@@ -27,6 +27,7 @@ namespace Canvas_test
         public double SpeedX { get; set; }
         public double SpeedY { get; set; }
         public double SpeedMultiplier { get; set; }
+        public double MaxVMultiplier { get; set; } = 1;
 
         public override string ToString()
         {
@@ -44,24 +45,28 @@ namespace Canvas_test
                     ExplosionRadius = 80;
                     ExplosionDestroyDistance = 20;
                     SpeedMultiplier = 1;
+                    MaxVMultiplier = 1;
                     break;
                 case BulletType.BigBullet:
                     Damage = 40;
                     ExplosionRadius = 160;
                     ExplosionDestroyDistance = 50;
                     SpeedMultiplier = 1;
+                    MaxVMultiplier = 1;
                     break;
                 case BulletType.Nuclear:
-                    Damage = 100;
+                    Damage = 80;
                     ExplosionRadius = 200;
-                    ExplosionDestroyDistance = 150;
-                    SpeedMultiplier = 0.5;
+                    ExplosionDestroyDistance = 100;
+                    SpeedMultiplier = 1;
+                    MaxVMultiplier = 0.5;
                     break;
                 case BulletType.Sniper:
-                    Damage = 20;
+                    Damage = 80;
                     ExplosionRadius = 30;
                     ExplosionDestroyDistance = 10;
                     SpeedMultiplier = 10;
+                    MaxVMultiplier = 1;
                     break;
                 default:
                     throw new Exception("Wrong bullet type");

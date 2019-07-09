@@ -29,13 +29,15 @@ namespace Canvas_test
     {
         System.Timers.Timer timer = new System.Timers.Timer();
         static int timeInterval = 30;
-        int waitMultiplier = 3;
+        int waitMultiplier = 1;
         int wind;
         bool isStarted = false;
         Random rnd = new Random();
         Bullet bullet = null;
         int terrainLength = 1000;
-        private int maxV = 100;
+        int maxHeight = 800;
+        int baseMaxV = 100;
+        private double maxVMultiplier = 1;
         public CanvasConvert coord;
         Ground terrain;
         int playerCount;
@@ -52,7 +54,13 @@ namespace Canvas_test
         List<Player.PlayerType> playerTypes = new List<Player.PlayerType>();
         private List<Tank> players;
 
-        public int MaxV { get => maxV; }
+        public int MaxV
+        {
+            get
+            {
+                return (int)(baseMaxV * maxVMultiplier);
+            }
+        }
         public int Wind { get => wind; }
         public Ground Terrain { get => terrain; }
 
@@ -82,7 +90,7 @@ namespace Canvas_test
             isStarted = true;
             InitBrushes();
             coord = new CanvasConvert(background.ActualHeight, background.ActualWidth, terrainLength);
-            terrain = new Ground(terrainLength, coord, ground);
+            terrain = new Ground(terrainLength, maxHeight, coord, ground);
             players = new List<Tank>();
             for (int i = 0; i < playerCount; i++)
             {
@@ -91,7 +99,7 @@ namespace Canvas_test
                 Players[i].MoveTarget();
                 Players[i].AddBullet(new Bullet(Bullet.BulletType.SmallBullet, 99));
                 Players[i].AddBullet(new Bullet(Bullet.BulletType.BigBullet, 10));
-                Players[i].AddBullet(new Bullet(Bullet.BulletType.Nuclear, 0));
+                Players[i].AddBullet(new Bullet(Bullet.BulletType.Nuclear, 1));
                 Players[i].AddBullet(new Bullet(Bullet.BulletType.Sniper, 5));
                 Players[i].SelectedBullet = Players[i].Bullets[Bullet.BulletType.SmallBullet];
             }
@@ -409,6 +417,7 @@ namespace Canvas_test
         private void BulletSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             activePlayer.SelectedBullet = bulletSelector.SelectedItem as Bullet;
+            maxVMultiplier = activePlayer.SelectedBullet.MaxVMultiplier;
         }
 
         private void StartButton_Click(object sender, RoutedEventArgs e)
