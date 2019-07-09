@@ -20,7 +20,6 @@ namespace Canvas_test
         private double baseSpeed;
 
         CanvasConvert coord;
-        Ground terrain;
 
         static Random rnd = new Random();
 

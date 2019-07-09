@@ -29,6 +29,7 @@ namespace Canvas_test
     {
         System.Timers.Timer timer = new System.Timers.Timer();
         static int timeInterval = 30;
+        int waitMultiplier = 3;
         int wind;
         bool isStarted = false;
         Random rnd = new Random();
@@ -41,7 +42,7 @@ namespace Canvas_test
         public List<Tank> Players => players;
         List<Tank> removeList = new List<Tank>();
         bool hit = false;
-        Tank activePlayer;
+        public Tank activePlayer;
         private List<System.Windows.Media.Brush> _brushes;
         List<System.Windows.Point> pointList;
         ObservableCollection<Bullet> currentBullets = new ObservableCollection<Bullet>();
@@ -245,7 +246,7 @@ namespace Canvas_test
 
         async Task PutTaskDelay()
         {
-            await Task.Delay(rnd.Next(500, 1501));
+            await Task.Delay(rnd.Next(waitMultiplier * 500, waitMultiplier * 1501));
         }
 
         private void ShowExplosion(int radius)

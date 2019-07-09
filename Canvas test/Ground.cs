@@ -40,35 +40,35 @@ namespace Canvas_test
 
         private void GenerateTerrain(double variations)
         {
-            int signCounter = rnd.Next(0, terrainLength / 10);
-            int sign = rnd.Next(2);
-            if (sign == 0) sign = -1;
-            int angleCounter = rnd.Next(0, terrainLength / 10);
-            int angle = rnd.Next(50);
-            Height[0] = rnd.Next(200, 300);
-            for (int i = 1; i <= terrainLength; i++)
-            {
-                if (i > signCounter)
-                {
-                    sign = -sign;
-                    signCounter = rnd.Next(signCounter + 1, signCounter + terrainLength / 10);
-                }
-                if (i > angleCounter)
-                {
-                    angle = rnd.Next(50);
-                    angleCounter = rnd.Next(angleCounter + 1, angleCounter + terrainLength / 10);
-                }
-                Height[i] = Height[i - 1] + rnd.Next(angle) * variations * sign;
-                if (Height[i] < 0)
-                {
-                    Height[i] = 0;
-                }
-            }
-
-            //for(int i = 0; i < terrainLength; i++)
+            //int signCounter = rnd.Next(0, terrainLength / 10);
+            //int sign = rnd.Next(2);
+            //if (sign == 0) sign = -1;
+            //int angleCounter = rnd.Next(0, terrainLength / 10);
+            //int angle = rnd.Next(50);
+            //Height[0] = rnd.Next(200, 300);
+            //for (int i = 1; i <= terrainLength; i++)
             //{
-            //    Height[i] = Math.Abs(i-terrainLength/2);
+            //    if (i > signCounter)
+            //    {
+            //        sign = -sign;
+            //        signCounter = rnd.Next(signCounter + 1, signCounter + terrainLength / 10);
+            //    }
+            //    if (i > angleCounter)
+            //    {
+            //        angle = rnd.Next(50);
+            //        angleCounter = rnd.Next(angleCounter + 1, angleCounter + terrainLength / 10);
+            //    }
+            //    Height[i] = Height[i - 1] + rnd.Next(angle) * variations * sign;
+            //    if (Height[i] < 0)
+            //    {
+            //        Height[i] = 0;
+            //    }
             //}
+
+            for (int i = 0; i < terrainLength; i++)
+            {
+                Height[i] = Math.Abs(i - terrainLength / 2);
+            }
         }
 
         public void DestroyTerrain(double hitX, int size)

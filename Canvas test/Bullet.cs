@@ -58,7 +58,7 @@ namespace Canvas_test
                     SpeedMultiplier = 0.5;
                     break;
                 case BulletType.Sniper:
-                    Damage = 200;
+                    Damage = 20;
                     ExplosionRadius = 30;
                     ExplosionDestroyDistance = 10;
                     SpeedMultiplier = 10;
@@ -71,7 +71,7 @@ namespace Canvas_test
         {
             double radAngle;
             X = x;
-            Y = y;
+            Y = y + 2;
             if (direction == 'r')
             {
                 radAngle = (angle) * Math.PI / 180;
@@ -94,12 +94,13 @@ namespace Canvas_test
         public List<System.Windows.Point> CalulateShot(CanvasConvert coord, Ground terrain, int wind, out bool hit)
         {
             bool terrainHit = false;
+            bool tankHit = false;
             bool overGround = true;
             bool inside = true;
             int timeInterval = 2;
             List<System.Windows.Point> result = new List<System.Windows.Point>();
             result.Add(coord.ToWindowsPoint(X, Y));
-            while (!terrainHit && overGround)
+            while (!terrainHit && !tankHit && overGround)
             {
                 inside = X >= -1 && X <= terrain.terrainLength + 1;
                 overGround = Y >= 0;
@@ -109,8 +110,9 @@ namespace Canvas_test
                     result.Add(coord.ToWindowsPoint(X, Y)); 
                 }
                 terrainHit = terrain.CheckHit(X, Y);
+                tankHit = Tank.CheckHit(X, Y);
             }
-            hit = terrainHit;
+            hit = terrainHit || tankHit;
             return result;
         }
     }

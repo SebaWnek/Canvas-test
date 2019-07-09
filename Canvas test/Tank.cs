@@ -9,12 +9,15 @@ using System.Windows.Media;
 using System.Reflection;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Windows;
 
 namespace Canvas_test
 {
     public class Tank : INotifyPropertyChanged
     {
         public Dictionary<Bullet.BulletType, Bullet> Bullets { get; }
+        private static MainWindow main = (MainWindow)Application.Current.MainWindow;
+        public static int Size {get;} = 3;
 
         public void AddBullet(Bullet bullet)
         {
@@ -137,6 +140,21 @@ namespace Canvas_test
             PositionX = position;
         }
 
+        internal static bool CheckHit(double x, double y)
+        {
+            bool hit = false;
+            foreach(Tank tank in main.Players)
+            {
+                double dx = Math.Abs(tank.PositionX - x);
+                double dy = Math.Abs(tank.PositionY - y);
+                if(dx < Size && dy < Size && tank != main.activePlayer)
+                {
+                    hit = true;
+                }
+            }
+            return hit;
+        }
+
         public double[] GetTargetPosition(int angle)
         {
             double radAngle;
@@ -155,7 +173,7 @@ namespace Canvas_test
 
         public void MoveTank()
         {
-            PositionY = terrain.Height[(int)PositionX];
+            PositionY = terrain.Height[(int)PositionX] + Size;
             Canvas.SetLeft(image, coord.ToInt(PositionX, PositionY)[0] - 5);
             Canvas.SetTop(image, coord.ToInt(PositionX, PositionY)[1] - 5);
             Canvas.SetLeft(NameLabel, coord.ToInt(PositionX, PositionY)[0] - 25);

@@ -39,5 +39,10 @@ namespace Canvas_test
             relativeX = target.PositionX - player.PositionX;
             relativeY = target.PositionY - player.PositionY;
         }
+        protected void CalclulateRelativeCoordinates(Tank tank)
+        {
+            relativeX = tank.PositionX - player.PositionX;
+            relativeY = tank.PositionY - player.PositionY;
+        }
     }
 }

@@ -8,7 +8,7 @@ namespace Canvas_test
 {
     class Hard : Player
     {
-        List<Tank> targets = new List<Tank>();
+        static Dictionary<Tank, int> targets = new Dictionary<Tank, int>();
         int targetCount;
         bool lineOfSight = false;
 
@@ -27,7 +27,7 @@ namespace Canvas_test
             double[] choosenParams;
 
             target = ChooseTarget();
-            minAngle = FindMinAngle(out lineOfSight);
+            minAngle = FindMinAngle(null, out lineOfSight);
             CalclulateRelativeCoordinates();
             direction = relativeX > 0 ? 0 : 1;
             player.SelectedBullet = ChooseBullet();
@@ -61,28 +61,66 @@ namespace Canvas_test
 
         protected override Tank ChooseTarget()
         {
+            if(main.Players.Count == 2)
+            {
+                foreach(Tank tank in main.Players)
+                {
+                    if (tank != player) return tank;
+                }
+            }
             targets.Clear();
+            int score;
             foreach (Tank tank in main.Players)
             {
                 if (tank != player)
                 {
-                    targets.Add(tank);
+                    score = EvaluateTarget(tank);
+                    targets.Add(tank, score);
                 }
             }
-            targetCount = targets.Count;
-            return targets[random.Next(targetCount)];
+            var sortList = targets.ToList();
+            sortList.Sort((pair1, pair2) => pair1.Value.CompareTo(pair2.Value));
+            return sortList.Last().Key;
         }
 
-        private int FindMinAngle(out bool los)
+        private int EvaluateTarget(Tank tank)
+        {
+            int score = 0;
+            CalclulateRelativeCoordinates(tank);
+            double distance = Math.Sqrt(relativeX * relativeX + relativeY * relativeY);
+            int HP = tank.HP;
+            bool los;
+            FindMinAngle(tank, out los);
+            if (distance < 30) score -= 10;
+            if (distance < 100) score -= 5;
+            if (distance > 600) score -= 3;
+            if (HP < 20) score += 5;
+            if (HP >= 20 && HP < 50) score += 3;
+            if (HP >= 50 && HP < 70) score += 1;
+            if (los && player.Bullets[Bullet.BulletType.Sniper].BulletCount > 0) score += 6;
+            if (los && player.Bullets[Bullet.BulletType.Sniper].BulletCount == 0) score += 3;
+
+            return score;
+        }
+
+        private int FindMinAngle(Tank tar, out bool los)
         {
             double[] terrain = main.Terrain.Height;
-            double targetX = target.PositionX;
-            double targetY = target.PositionY;
+            double targetX;
+            if (tar != null)
+            {
+                targetX = tar.PositionX; 
+            }
+            else
+            {
+                targetX = target.PositionX;
+            }
+            double targetY = main.Terrain.Height[(int)Math.Round(targetX)];
             double playerY = player.PositionY;
             double playerX = player.PositionX;
             double x;
             double y;
-            double tmpMinAngle = Math.Asin((targetY - playerY) / Math.Abs(playerX - targetX)) * 180 / Math.PI;
+            double tmpMinAngle = Math.Asin((targetY - playerY) / Math.Abs(playerX - targetX)) * 180 / Math.PI + 1;
             los = true;
 
             double tmpAngle;
@@ -90,19 +128,13 @@ namespace Canvas_test
             int maxX = targetX < playerX ? (int)playerX : (int)targetX;
             for (int i = minX; i < maxX; i++)
             {
-                if (terrain[i] > playerY)
+                x = Math.Abs(playerX - i);
+                y = terrain[i] - playerY;
+                tmpAngle = Math.Asin(y / x) * 180 / Math.PI;
+                if (tmpAngle > tmpMinAngle && x > 0)
                 {
-                    x = Math.Abs(playerX - i);
-                    y = terrain[i] - playerY;
-                    if (x > 2)
-                    {
-                        tmpAngle = Math.Asin(y / x) * 180 / Math.PI;
-                        if (tmpAngle > tmpMinAngle)
-                        {
-                            tmpMinAngle = tmpAngle;
-                            los = false;
-                        }
-                    }
+                    tmpMinAngle = tmpAngle;
+                    los = false;
                 }
             }
             return (int)tmpMinAngle;
@@ -131,7 +163,7 @@ namespace Canvas_test
             double[] results = new double[181];
             for (int i = 0; i < 181; i++)
             {
-                results[i] = (int)Math.Round(CalculatePowerFromAngle(i - 90));
+                results[i] = CalculatePowerFromAngle(i - 90);
             }
             return results;
         }
@@ -144,19 +176,20 @@ namespace Canvas_test
 
             if (los)
             {
-                for (int i = minAngle +90; i < powers.Length - 1; i++)
+                for (int i = 0; i < powers.Length - 1; i++)
                 {
                     if (powers[i] > 0 && powers[i] < choosenPower)
                     {
                         choosenPower = powers[i];
                         choosenAngle = i - 90;
                         result = new double[] { choosenPower / player.SelectedBullet.SpeedMultiplier, choosenAngle };
+                        break;
                     }
                 }
             }
-            else if (minAngle <= 70)
+            else if (minAngle <= 60)
             {
-                for (int i = minAngle + 100; i < powers.Length; i++)
+                for (int i = minAngle + 110; i < powers.Length - 1; i++)
                 {
                     if (powers[i] > 0 && powers[i] < choosenPower)
                     {
@@ -168,6 +201,7 @@ namespace Canvas_test
             }
             else
             {
+                choosenPower = int.MaxValue;
                 for (int i = powers.Length - 1; i > 0; i--)
                 {
                     if (powers[i] > 0 && powers[i] < choosenPower)
