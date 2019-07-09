@@ -144,7 +144,7 @@ namespace Canvas_test
 
             if (los)
             {
-                for (int i = minAngle >= 0 ? minAngle : 0; i < powers.Length - 1; i++)
+                for (int i = minAngle +90; i < powers.Length - 1; i++)
                 {
                     if (powers[i] > 0 && powers[i] < choosenPower)
                     {
