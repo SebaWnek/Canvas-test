@@ -30,17 +30,18 @@ namespace Canvas_test
         System.Timers.Timer timer = new System.Timers.Timer();
         static int timeInterval = 30;
         int waitMultiplier = 1;
+        int maxPlayers = 12;
         int wind;
         bool isStarted = false;
         Random rnd = new Random();
         Bullet bullet = null;
         int terrainLength = 1000;
-        int maxHeight = 800;
+        int maxHeight = 600;
         int baseMaxV = 100;
         private double maxVMultiplier = 1;
         public CanvasConvert coord;
         Ground terrain;
-        int playerCount;
+        int playerCount = 0;
         public List<Tank> Players => players;
         List<Tank> removeList = new List<Tank>();
         bool hit = false;
@@ -67,16 +68,16 @@ namespace Canvas_test
         public MainWindow()
         {
             InitializeComponent();
-            playerTypes.Add(Player.PlayerType.Hard);
-            playerTypes.Add(Player.PlayerType.Hard);
-            playerTypes.Add(Player.PlayerType.Hard);
-            playerTypes.Add(Player.PlayerType.Hard);
-            playerTypes.Add(Player.PlayerType.Hard);
-            playerTypes.Add(Player.PlayerType.Hard);
-            playerTypes.Add(Player.PlayerType.Hard);
-            playerTypes.Add(Player.PlayerType.Hard);
-            playerTypes.Add(Player.PlayerType.Hard);
-            playerTypes.Add(Player.PlayerType.Hard);
+            //playerTypes.Add(Player.PlayerType.Hard);
+            //playerTypes.Add(Player.PlayerType.Hard);
+            //playerTypes.Add(Player.PlayerType.Hard);
+            //playerTypes.Add(Player.PlayerType.Hard);
+            //playerTypes.Add(Player.PlayerType.Hard);
+            //playerTypes.Add(Player.PlayerType.Hard);
+            //playerTypes.Add(Player.PlayerType.Hard);
+            //playerTypes.Add(Player.PlayerType.Hard);
+            //playerTypes.Add(Player.PlayerType.Hard);
+            //playerTypes.Add(Player.PlayerType.Hard);
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -416,25 +417,39 @@ namespace Canvas_test
 
         private void BulletSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            activePlayer.SelectedBullet = bulletSelector.SelectedItem as Bullet;
-            maxVMultiplier = activePlayer.SelectedBullet.MaxVMultiplier;
+            try
+            {
+                activePlayer.SelectedBullet = bulletSelector.SelectedItem as Bullet;
+                maxVMultiplier = activePlayer.SelectedBullet.MaxVMultiplier;
+            }
+            catch (Exception)
+            {
+            }
         }
 
         private void StartButton_Click(object sender, RoutedEventArgs e)
         {
-            try
+            ReadPlayerTypes();
+            if (playerCount >= 2)
             {
-                playerCount = int.Parse(playerCountBox.Text);
-                if (playerCount > 10)
-                {
-                    throw new ArgumentException("Too many players!");
-                }
                 mainMenu.Visibility = Visibility.Collapsed;
-                GenerateNewGame();
+                GenerateNewGame(); 
             }
-            catch (Exception ex)
+            else
             {
-                MessageBox.Show("Wrong player count!" + ex.Message);
+                MessageBox.Show("Not enough players!");
+            }
+        }
+
+        private void ReadPlayerTypes()
+        {
+            foreach(ListBox type in playerTypeSelector.Children)
+            {
+                if (type.SelectedIndex >= 0)
+                {
+                    playerTypes.Add((Player.PlayerType)type.SelectedIndex);
+                    playerCount++;
+                }
             }
         }
     }

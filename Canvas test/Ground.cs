@@ -75,7 +75,7 @@ namespace Canvas_test
 
         public void DestroyTerrain(double hitX, int size)
         {
-            int hitXint = (int)Math.Round(hitX) + 1;
+            int hitXint = hitX < terrainLength ? (int)Math.Round(hitX) + 1 : (int)Math.Round(hitX);
             double medium = Height[hitXint];
             double tmp;
             for (int i = -size; i < size; i++)

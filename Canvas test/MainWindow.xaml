@@ -25,9 +25,94 @@
                 <StackPanel Orientation="Horizontal">
                     <Label Content="Player Count:"/>
                     <TextBox x:Name="playerCountBox" Width="40"/>
-                </StackPanel>
-                <Button Click="StartButton_Click">OK</Button>
             </StackPanel>
+                    <Grid x:Name="playerTypeSelector">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <ListBox Grid.Row="0" Grid.Column="0">
+                        <ListBoxItem>Human</ListBoxItem>
+                        <ListBoxItem>Easy</ListBoxItem>
+                        <ListBoxItem>Medium</ListBoxItem>
+                        <ListBoxItem>Hard</ListBoxItem>
+                    </ListBox>
+                    <ListBox Grid.Row="0" Grid.Column="1">
+                        <ListBoxItem>Human</ListBoxItem>
+                        <ListBoxItem>Easy</ListBoxItem>
+                        <ListBoxItem>Medium</ListBoxItem>
+                        <ListBoxItem>Hard</ListBoxItem>
+                    </ListBox>
+                    <ListBox Grid.Row="0" Grid.Column="2">
+                        <ListBoxItem>Human</ListBoxItem>
+                        <ListBoxItem>Easy</ListBoxItem>
+                        <ListBoxItem>Medium</ListBoxItem>
+                        <ListBoxItem>Hard</ListBoxItem>
+                    </ListBox>
+                    <ListBox Grid.Row="0" Grid.Column="3">
+                        <ListBoxItem>Human</ListBoxItem>
+                        <ListBoxItem>Easy</ListBoxItem>
+                        <ListBoxItem>Medium</ListBoxItem>
+                        <ListBoxItem>Hard</ListBoxItem>
+                    </ListBox>
+                    <ListBox Grid.Row="1" Grid.Column="0">
+                        <ListBoxItem>Human</ListBoxItem>
+                        <ListBoxItem>Easy</ListBoxItem>
+                        <ListBoxItem>Medium</ListBoxItem>
+                        <ListBoxItem>Hard</ListBoxItem>
+                    </ListBox>
+                    <ListBox Grid.Row="1" Grid.Column="1">
+                        <ListBoxItem>Human</ListBoxItem>
+                        <ListBoxItem>Easy</ListBoxItem>
+                        <ListBoxItem>Medium</ListBoxItem>
+                        <ListBoxItem>Hard</ListBoxItem>
+                    </ListBox>
+                    <ListBox Grid.Row="1" Grid.Column="2">
+                        <ListBoxItem>Human</ListBoxItem>
+                        <ListBoxItem>Easy</ListBoxItem>
+                        <ListBoxItem>Medium</ListBoxItem>
+                        <ListBoxItem>Hard</ListBoxItem>
+                    </ListBox>
+                    <ListBox Grid.Row="1" Grid.Column="3">
+                        <ListBoxItem>Human</ListBoxItem>
+                        <ListBoxItem>Easy</ListBoxItem>
+                        <ListBoxItem>Medium</ListBoxItem>
+                        <ListBoxItem>Hard</ListBoxItem>
+                    </ListBox>
+                    <ListBox Grid.Row="2" Grid.Column="0">
+                        <ListBoxItem>Human</ListBoxItem>
+                        <ListBoxItem>Easy</ListBoxItem>
+                        <ListBoxItem>Medium</ListBoxItem>
+                        <ListBoxItem>Hard</ListBoxItem>
+                    </ListBox>
+                    <ListBox Grid.Row="2" Grid.Column="1">
+                        <ListBoxItem>Human</ListBoxItem>
+                        <ListBoxItem>Easy</ListBoxItem>
+                        <ListBoxItem>Medium</ListBoxItem>
+                        <ListBoxItem>Hard</ListBoxItem>
+                    </ListBox>
+                    <ListBox Grid.Row="2" Grid.Column="2">
+                        <ListBoxItem>Human</ListBoxItem>
+                        <ListBoxItem>Easy</ListBoxItem>
+                        <ListBoxItem>Medium</ListBoxItem>
+                        <ListBoxItem>Hard</ListBoxItem>
+                    </ListBox>
+                    <ListBox Grid.Row="2" Grid.Column="3">
+                        <ListBoxItem>Human</ListBoxItem>
+                        <ListBoxItem>Easy</ListBoxItem>
+                        <ListBoxItem>Medium</ListBoxItem>
+                        <ListBoxItem>Hard</ListBoxItem>
+                    </ListBox>
+                </Grid>
+                <Button Click="StartButton_Click">OK</Button>
+                </StackPanel>
         </Grid>
         <Canvas x:Name="background" x:FieldModifier="public">
             <Canvas.Background>
