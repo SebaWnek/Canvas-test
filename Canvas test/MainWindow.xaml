@@ -24,7 +24,7 @@
             <StackPanel Grid.Row="1" Grid.Column="1">
                 <StackPanel Orientation="Horizontal">
                     <Label Content="Sql password"/>
-                    <PasswordBox x:Name="sqlPasswordBox" Width="100" Password="Samochody1"/>
+                    <PasswordBox x:Name="sqlPasswordBox" Width="100" Password=""/>
             </StackPanel>
                     <Grid x:Name="playerTypeSelector">
                         <Grid.ColumnDefinitions>
