@@ -13,6 +13,7 @@ namespace Canvas_test
         bool lineOfSight = false;
         int multiple;
         bool willHit;
+        double a;
 
         public Hard(Tank player) : base(player)
         {
@@ -37,7 +38,7 @@ namespace Canvas_test
             choosenParams = FindParameters(results, minAngle, lineOfSight);
             power = choosenParams[0];
             angle = (int)choosenParams[1];
-            return new double[] { direction, power, angle };
+            return new double[] { direction, power, angle, relativeX, relativeY, a };
         }
         // to be changed later
         protected override Bullet ChooseBullet()
@@ -183,7 +184,7 @@ namespace Canvas_test
             double y = relativeY;
             double g = 9.81;
             double wind = main.Wind;
-            double a = relativeX / wind >= 0 ? Math.Abs(wind) : -Math.Abs(wind);
+            a = relativeX / wind >= 0 ? Math.Abs(wind) : -Math.Abs(wind);
             double sqrt2 = Math.Sqrt(2);
             double part1 = sqrt2 * (x * sin - y * cos) * (y * a + x * g) * (a * sin + g * cos);
             double part2 = Math.Sqrt(1 / ((x * sin - y * cos) * (a * sin + g * cos)));

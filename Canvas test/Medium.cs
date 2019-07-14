@@ -10,10 +10,10 @@ namespace Canvas_test
     {
         List<Tank> targets = new List<Tank>();
         int targetCount;
-        double windDivider = 10;
+        double windDivider = 8;
         public Medium(Tank player) : base(player)
         {
-            Type = PlayerType.Easy;
+            Type = PlayerType.Medium;
         }
         public override double[] ChooseParameters()
         {
@@ -32,7 +32,7 @@ namespace Canvas_test
             power = power + windDirection * (int)(windCoefficient * power);
             if (power > 100) power = 100;
             if (power <= 0) power = 10;
-            return new double[] { direction, power, angle };
+            return new double[] { direction, power, angle, relativeX, relativeY, windDirection * Math.Abs(main.Wind) };
         }
 
         protected override Bullet ChooseBullet()

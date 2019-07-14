@@ -15,6 +15,11 @@ namespace Canvas_test
     {
         private void Application_Exit(object sender, ExitEventArgs e)
         {
+            MainWindow main = (MainWindow)Application.Current.MainWindow;
+            if (main.logger.isConnected)
+            {
+                main.logger.EndConnection(); 
+            }
             Environment.Exit(0);
         }
     }

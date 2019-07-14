@@ -27,16 +27,17 @@ namespace Canvas_test
     /// </summary>
     public partial class MainWindow : Window
     {
+        public sqlLogger logger;
+        double[] loggerData = new double[7];
         System.Timers.Timer timer = new System.Timers.Timer();
         static int timeInterval = 30;
         int waitMultiplier = 1;
-        int maxPlayers = 12;
         int wind;
         bool isStarted = false;
         Random rnd = new Random();
         Bullet bullet = null;
         int terrainLength = 1000;
-        int maxHeight = 600;
+        int maxHeight = 500;
         int baseMaxV = 100;
         private double maxVMultiplier = 1;
         public CanvasConvert coord;
@@ -134,7 +135,6 @@ namespace Canvas_test
             if (hit == true)
             {
                 line.Points.Add(pointList[stepsCount - 1]);
-                GenerateWind();
                 Terrain.DestroyTerrain(bullet.X, bullet.ExplosionDestroyDistance);
                 activePlayer.MoveTank();
                 activePlayer.MoveTarget();
@@ -145,6 +145,15 @@ namespace Canvas_test
                     player.MoveTarget();
                 }
                 CheckDamage(bullet.X);
+                if (logger.isConnected && activePlayer.player.Type == Player.PlayerType.Medium)
+                {
+                    int direction = (activePlayer.Direction == 'r' && bullet.X > activePlayer.PositionX) ||
+                        (activePlayer.Direction != 'r' && bullet.X < activePlayer.PositionX) ? 1 : -1;
+                    loggerData[2] = Math.Abs(bullet.X - activePlayer.PositionX) * direction;
+                    loggerData[3] = bullet.Y - activePlayer.PositionY;
+                    logger.LogShot(loggerData);
+                }
+                GenerateWind();
                 bullet = null;
                 activePlayer = NextPlayer();
                 ListCurrentBullets();
@@ -249,6 +258,14 @@ namespace Canvas_test
                 activePlayer.MoveTank();
                 activePlayer.MoveTarget();
                 await PutTaskDelay();
+                if (logger.isConnected && activePlayer.player.Type == Player.PlayerType.Medium)
+                {
+                    loggerData[0] = aiCoords[3];
+                    loggerData[1] = aiCoords[4];
+                    loggerData[4] = aiCoords[5];
+                    loggerData[5] = aiCoords[1];
+                    loggerData[6] = aiCoords[2];
+                }
                 Shot();
             }
         }
@@ -439,6 +456,8 @@ namespace Canvas_test
             {
                 MessageBox.Show("Not enough players!");
             }
+            sqlPasswordBox.SecurePassword.MakeReadOnly();
+            logger = new sqlLogger(sqlPasswordBox.SecurePassword);
         }
 
         private void ReadPlayerTypes()

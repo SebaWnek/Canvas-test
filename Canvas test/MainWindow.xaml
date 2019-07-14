@@ -23,8 +23,8 @@
             </Grid.RowDefinitions>
             <StackPanel Grid.Row="1" Grid.Column="1">
                 <StackPanel Orientation="Horizontal">
-                    <Label Content="Player Count:"/>
-                    <TextBox x:Name="playerCountBox" Width="40"/>
+                    <Label Content="Sql password"/>
+                    <PasswordBox x:Name="sqlPasswordBox" Width="100" Password="Samochody1"/>
             </StackPanel>
                     <Grid x:Name="playerTypeSelector">
                         <Grid.ColumnDefinitions>
