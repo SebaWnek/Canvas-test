@@ -95,6 +95,9 @@ namespace Canvas_test
                 case Player.PlayerType.Hard:
                     player = new Hard(this);
                     break;
+                case Player.PlayerType.Learning:
+                    player = new Learning(this);
+                    break;
                 default:
                     throw new ArgumentException("wrong player type!");
             }

@@ -19,7 +19,8 @@ namespace Canvas_test
             Human,
             Easy,
             Medium,
-            Hard
+            Hard,
+            Learning
         }
         public PlayerType Type { get; set; }
         protected Tank player;

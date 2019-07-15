@@ -18,14 +18,21 @@ namespace Canvas_test
         Polygon ground;
         Random rnd = new Random();
         int maxHeight;
-        public Ground(int length, int maxHeight, CanvasConvert cd, Polygon gr)
+        public enum GroundType
+        {
+            normal,
+            flat,
+            zero,
+            vShaped
+        }
+        public Ground(int length, int maxHeight, CanvasConvert cd, Polygon gr, GroundType type)
         {
             coord = cd;
             ground = gr;
             terrainLength = length;
             this.maxHeight = maxHeight;
             Height = new double[terrainLength + 1];
-            GenerateTerrain(0.1);
+            GenerateTerrain(type, 0.1);
             HeigthToTerrain();
         }
 
@@ -40,7 +47,7 @@ namespace Canvas_test
             ground.Points.Add(coord.ToWindowsPoint(terrainLength, 0));
         }
 
-        private void GenerateTerrain(double variations)
+        private void GenerateTerrain(GroundType type, double variations)
         {
             int signCounter = rnd.Next(0, terrainLength / 10);
             int sign = rnd.Next(2);
@@ -48,29 +55,51 @@ namespace Canvas_test
             int angleCounter = rnd.Next(0, terrainLength / 10);
             int angle = rnd.Next(60);
             Height[0] = rnd.Next(200, 300);
-            for (int i = 1; i <= terrainLength; i++)
+            if (type == GroundType.normal)
             {
-                if (i > signCounter || Height[i - 1] > maxHeight)
+                for (int i = 1; i <= terrainLength; i++)
                 {
-                    sign = -sign;
-                    signCounter = rnd.Next(signCounter + 1, signCounter + terrainLength / 10);
-                }
-                if (i > angleCounter)
+                    if (i > signCounter || Height[i - 1] > maxHeight)
+                    {
+                        sign = -sign;
+                        signCounter = rnd.Next(signCounter + 1, signCounter + terrainLength / 10);
+                    }
+                    if (i > angleCounter)
+                    {
+                        angle = rnd.Next(50);
+                        angleCounter = rnd.Next(angleCounter + 1, angleCounter + terrainLength / 10);
+                    }
+                    Height[i] = Height[i - 1] + rnd.Next(angle) * variations * sign;
+                    if (Height[i] < 0)
+                    {
+                        Height[i] = 0;
+                    }
+                } 
+            }
+
+            if (type == GroundType.vShaped)
+            {
+                for (int i = 0; i < terrainLength; i++)
                 {
-                    angle = rnd.Next(50);
-                    angleCounter = rnd.Next(angleCounter + 1, angleCounter + terrainLength / 10);
-                }
-                Height[i] = Height[i - 1] + rnd.Next(angle) * variations * sign;
-                if (Height[i] < 0)
-                {
-                    Height[i] = 0;
+                    Height[i] = Math.Abs(i - terrainLength / 2);
                 }
             }
 
-            //for (int i = 0; i < terrainLength; i++)
-            //{
-            //    Height[i] = Math.Abs(i - terrainLength / 2);
-            //}
+            if (type == GroundType.flat)
+            {
+                int h = rnd.Next(100, 401);
+                for (int i = 0; i < terrainLength; i++)
+                {
+                    Height[i] = h;
+                }
+            }
+            if (type == GroundType.zero)
+            {
+                for (int i = 0; i < terrainLength; i++)
+                {
+                    Height[i] = 1;
+                }
+            }
         }
 
         public void DestroyTerrain(double hitX, int size)

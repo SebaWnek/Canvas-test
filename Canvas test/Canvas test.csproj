@@ -57,10 +57,12 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Hard.cs" />
+    <Compile Include="Learning.cs" />
     <Compile Include="Medium.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="Easy.cs" />
     <Compile Include="Human.cs" />
+    <Compile Include="RegCalculator.cs" />
     <Compile Include="Sky.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

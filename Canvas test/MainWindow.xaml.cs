@@ -28,9 +28,9 @@ namespace Canvas_test
     public partial class MainWindow : Window
     {
         public sqlLogger logger;
-        double[] loggerData = new double[7];
+        double[] loggerData = new double[8];
         System.Timers.Timer timer = new System.Timers.Timer();
-        static int timeInterval = 30;
+        static int timeInterval = 10;
         int waitMultiplier = 1;
         int wind;
         bool isStarted = false;
@@ -87,12 +87,20 @@ namespace Canvas_test
             timer.Interval = timeInterval;
         }
 
+        private async void ContinueGame()
+        {
+            activePlayer.RemovePlayer();
+            players.Clear();
+            await PutTaskDelay();
+            GenerateNewGame();
+        }
+
         private async void GenerateNewGame()
         {
             isStarted = true;
             InitBrushes();
             coord = new CanvasConvert(background.ActualHeight, background.ActualWidth, terrainLength);
-            terrain = new Ground(terrainLength, maxHeight, coord, ground);
+            terrain = new Ground(terrainLength, maxHeight, coord, ground, Ground.GroundType.zero);
             players = new List<Tank>();
             for (int i = 0; i < playerCount; i++)
             {
@@ -100,7 +108,7 @@ namespace Canvas_test
                 Players[i].MoveTank();
                 Players[i].MoveTarget();
                 Players[i].AddBullet(new Bullet(Bullet.BulletType.SmallBullet, 99));
-                Players[i].AddBullet(new Bullet(Bullet.BulletType.BigBullet, 10));
+                Players[i].AddBullet(new Bullet(Bullet.BulletType.BigBullet, 0));
                 Players[i].AddBullet(new Bullet(Bullet.BulletType.Nuclear, 1));
                 Players[i].AddBullet(new Bullet(Bullet.BulletType.Sniper, 5));
                 Players[i].SelectedBullet = Players[i].Bullets[Bullet.BulletType.SmallBullet];
@@ -205,37 +213,46 @@ namespace Canvas_test
             if (Players.Count == 1)
             {
                 isStarted = false;
-                MessageBox.Show($"{Players.First().Name} has won!");
-                mainMenu.Visibility = Visibility.Visible;
+                ContinueGame();
+                //MessageBox.Show($"{Players.First().Name} has won!");
+                //mainMenu.Visibility = Visibility.Visible;
             }
             if (Players.Count == 0)
             {
                 isStarted = false;
-                MessageBox.Show("Tie!");
-                mainMenu.Visibility = Visibility.Visible;
+                ContinueGame();
+                //MessageBox.Show("Tie!");
+                //mainMenu.Visibility = Visibility.Visible;
             }
         }
 
         private Tank NextPlayer()
         {
-            activePlayer.activeSign.Visibility = Visibility.Hidden;
-            activePlayer.target.Visibility = Visibility.Hidden;
-            int currentPlayerNumber = Players.IndexOf(activePlayer);
-            if (currentPlayerNumber + 1 < playerCount)
+            if (playerCount > 1)
             {
-                Players[currentPlayerNumber + 1].activeSign.Visibility = Visibility.Visible;
-                Players[currentPlayerNumber + 1].target.Visibility = Visibility.Visible;
-                background.DataContext = Players[currentPlayerNumber + 1];
-                activePlayer.SelectedBullet = Players[currentPlayerNumber + 1].Bullets[Bullet.BulletType.SmallBullet];
-                return Players[currentPlayerNumber + 1];
+                activePlayer.activeSign.Visibility = Visibility.Hidden;
+                activePlayer.target.Visibility = Visibility.Hidden;
+                int currentPlayerNumber = Players.IndexOf(activePlayer);
+                if (currentPlayerNumber + 1 < playerCount)
+                {
+                    Players[currentPlayerNumber + 1].activeSign.Visibility = Visibility.Visible;
+                    Players[currentPlayerNumber + 1].target.Visibility = Visibility.Visible;
+                    background.DataContext = Players[currentPlayerNumber + 1];
+                    activePlayer.SelectedBullet = Players[currentPlayerNumber + 1].Bullets[Bullet.BulletType.SmallBullet];
+                    return Players[currentPlayerNumber + 1];
+                }
+                else
+                {
+                    Players[0].activeSign.Visibility = Visibility.Visible;
+                    Players[0].target.Visibility = Visibility.Visible;
+                    background.DataContext = Players[0];
+                    activePlayer.SelectedBullet = Players[0].Bullets[Bullet.BulletType.SmallBullet];
+                    return Players[0];
+                } 
             }
             else
             {
-                Players[0].activeSign.Visibility = Visibility.Visible;
-                Players[0].target.Visibility = Visibility.Visible;
-                background.DataContext = Players[0];
-                activePlayer.SelectedBullet = Players[0].Bullets[Bullet.BulletType.SmallBullet];
-                return Players[0];
+                return activePlayer;
             }
         }
 
@@ -265,6 +282,7 @@ namespace Canvas_test
                     loggerData[4] = aiCoords[5];
                     loggerData[5] = aiCoords[1];
                     loggerData[6] = aiCoords[2];
+                    loggerData[7] = aiCoords[6];
                 }
                 Shot();
             }
@@ -272,7 +290,7 @@ namespace Canvas_test
 
         async Task PutTaskDelay()
         {
-            await Task.Delay(rnd.Next(waitMultiplier * 500, waitMultiplier * 1501));
+            await Task.Delay(rnd.Next(waitMultiplier * 50, waitMultiplier * 151));
         }
 
         private void ShowExplosion(int radius)
@@ -447,6 +465,8 @@ namespace Canvas_test
         private void StartButton_Click(object sender, RoutedEventArgs e)
         {
             ReadPlayerTypes();
+            sqlPasswordBox.SecurePassword.MakeReadOnly();
+            logger = new sqlLogger(sqlPasswordBox.SecurePassword);
             if (playerCount >= 2)
             {
                 mainMenu.Visibility = Visibility.Collapsed;
@@ -456,8 +476,6 @@ namespace Canvas_test
             {
                 MessageBox.Show("Not enough players!");
             }
-            sqlPasswordBox.SecurePassword.MakeReadOnly();
-            logger = new sqlLogger(sqlPasswordBox.SecurePassword);
         }
 
         private void ReadPlayerTypes()

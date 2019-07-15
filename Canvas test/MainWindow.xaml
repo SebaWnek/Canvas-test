@@ -43,72 +43,84 @@
                         <ListBoxItem>Easy</ListBoxItem>
                         <ListBoxItem>Medium</ListBoxItem>
                         <ListBoxItem>Hard</ListBoxItem>
+                        <ListBoxItem>Learning</ListBoxItem>
                     </ListBox>
                     <ListBox Grid.Row="0" Grid.Column="1">
                         <ListBoxItem>Human</ListBoxItem>
                         <ListBoxItem>Easy</ListBoxItem>
                         <ListBoxItem>Medium</ListBoxItem>
                         <ListBoxItem>Hard</ListBoxItem>
+                        <ListBoxItem>Learning</ListBoxItem>
                     </ListBox>
                     <ListBox Grid.Row="0" Grid.Column="2">
                         <ListBoxItem>Human</ListBoxItem>
                         <ListBoxItem>Easy</ListBoxItem>
                         <ListBoxItem>Medium</ListBoxItem>
                         <ListBoxItem>Hard</ListBoxItem>
+                        <ListBoxItem>Learning</ListBoxItem>
                     </ListBox>
                     <ListBox Grid.Row="0" Grid.Column="3">
                         <ListBoxItem>Human</ListBoxItem>
                         <ListBoxItem>Easy</ListBoxItem>
                         <ListBoxItem>Medium</ListBoxItem>
                         <ListBoxItem>Hard</ListBoxItem>
+                        <ListBoxItem>Learning</ListBoxItem>
                     </ListBox>
                     <ListBox Grid.Row="1" Grid.Column="0">
                         <ListBoxItem>Human</ListBoxItem>
                         <ListBoxItem>Easy</ListBoxItem>
                         <ListBoxItem>Medium</ListBoxItem>
                         <ListBoxItem>Hard</ListBoxItem>
+                        <ListBoxItem>Learning</ListBoxItem>
                     </ListBox>
                     <ListBox Grid.Row="1" Grid.Column="1">
                         <ListBoxItem>Human</ListBoxItem>
                         <ListBoxItem>Easy</ListBoxItem>
                         <ListBoxItem>Medium</ListBoxItem>
                         <ListBoxItem>Hard</ListBoxItem>
+                        <ListBoxItem>Learning</ListBoxItem>
                     </ListBox>
                     <ListBox Grid.Row="1" Grid.Column="2">
                         <ListBoxItem>Human</ListBoxItem>
                         <ListBoxItem>Easy</ListBoxItem>
                         <ListBoxItem>Medium</ListBoxItem>
                         <ListBoxItem>Hard</ListBoxItem>
+                        <ListBoxItem>Learning</ListBoxItem>
                     </ListBox>
                     <ListBox Grid.Row="1" Grid.Column="3">
                         <ListBoxItem>Human</ListBoxItem>
                         <ListBoxItem>Easy</ListBoxItem>
                         <ListBoxItem>Medium</ListBoxItem>
                         <ListBoxItem>Hard</ListBoxItem>
+                        <ListBoxItem>Learning</ListBoxItem>
                     </ListBox>
                     <ListBox Grid.Row="2" Grid.Column="0">
                         <ListBoxItem>Human</ListBoxItem>
                         <ListBoxItem>Easy</ListBoxItem>
                         <ListBoxItem>Medium</ListBoxItem>
                         <ListBoxItem>Hard</ListBoxItem>
+                        <ListBoxItem>Learning</ListBoxItem>
                     </ListBox>
                     <ListBox Grid.Row="2" Grid.Column="1">
                         <ListBoxItem>Human</ListBoxItem>
                         <ListBoxItem>Easy</ListBoxItem>
                         <ListBoxItem>Medium</ListBoxItem>
                         <ListBoxItem>Hard</ListBoxItem>
+                        <ListBoxItem>Learning</ListBoxItem>
                     </ListBox>
                     <ListBox Grid.Row="2" Grid.Column="2">
                         <ListBoxItem>Human</ListBoxItem>
                         <ListBoxItem>Easy</ListBoxItem>
                         <ListBoxItem>Medium</ListBoxItem>
                         <ListBoxItem>Hard</ListBoxItem>
+                        <ListBoxItem>Learning</ListBoxItem>
                     </ListBox>
                     <ListBox Grid.Row="2" Grid.Column="3">
                         <ListBoxItem>Human</ListBoxItem>
                         <ListBoxItem>Easy</ListBoxItem>
                         <ListBoxItem>Medium</ListBoxItem>
                         <ListBoxItem>Hard</ListBoxItem>
+                        <ListBoxItem>Learning</ListBoxItem>
                     </ListBox>
                 </Grid>
                 <Button Click="StartButton_Click">OK</Button>
@@ -123,10 +135,7 @@
             </Canvas.Background>
 
 
-            <TextBlock Text="0" x:Name="xBlock" Canvas.Top="0"/>
-            <TextBlock Text="0" x:Name="yBlock" Canvas.Top="12"/>
-            <TextBlock Text="0" x:Name="vxBlock" Canvas.Top="24"/>
-            <TextBlock Text="0" x:Name="vyBlock" Canvas.Top="36"/>
+            <TextBlock Text="0" x:Name="recCalcBlock" Canvas.Top="0" Foreground="Red"/>
             <TextBlock Text="0" x:Name="windBlock" Canvas.Top="48"/>
             <TextBlock x:Name="vblock" Canvas.Top="0" Canvas.Left="120" Text="{Binding Path=Velocity}"/>
             <TextBlock x:Name="angleblock" Canvas.Top="12" Canvas.Left="120" Text="{Binding Path=Angle}"/>
