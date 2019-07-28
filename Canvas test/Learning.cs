@@ -9,46 +9,82 @@ namespace Canvas_test
 {
     class Learning : Medium
     {
-        int windDivider;
-        int[] windMinMax;
-        sqlLogger logger;
+        sqlConnector connector;
         RegCalculator calc;
         int minAngle;
+        int aDelta = 5;
+        int counterMax = 5;
 
         public Learning(Tank player) : base(player)
         {
             Type = PlayerType.Learning;
-            logger = main.logger;
-            calc = new RegCalculator(logger);
+            connector = main.logger;
+            calc = new RegCalculator(connector, main.Terrain.terrainLength, main.MaxV);
         }
 
         public override double[] ChooseParameters()
         {
             target = ChooseTarget();
-            CalclulateRelativeCoordinates();
-            minAngle = FindMinAngle(target);
-            int angle = random.Next(minAngle, minAngle + 30);
-            if (angle > 85) angle = 80;
-            player.SelectedBullet = ChooseBullet();
-            double windCoefficient = Math.Abs(main.Wind) * Math.Abs(main.Wind) * ((double)angle / 61) * ((double)angle / 61) / windDivider;
-            int windDirection = main.Wind / relativeX >= 0 ? -1 : 1;
-
-            int direction = relativeX >= 0 ? 0 : 1;
-            relativeX = Math.Abs(relativeX);
-            double radAngle = (angle) * Math.PI / 180;
-            int power = (int)Math.Sqrt((g * relativeX * relativeX) /
-                                  (relativeX * Math.Sin(2 * radAngle) - 2 * relativeY * Math.Cos(radAngle) * Math.Cos(radAngle)));
-
-            windMinMax = calc.FindMultipliers(main.Wind, angle - 30, angle + 30, power - 30, power + 30);
-            windCoefficient = random.Next(windMinMax[0], windMinMax[1] + 1);
-
-            power = power + windDirection * (int)(windCoefficient * power);
-
-            if (power > 100) power = 100;
-            if (power <= 0) power = 10;
-            return new double[] { direction, power, angle, relativeX, relativeY, windDirection * Math.Abs(main.Wind), windDivider };
+            double[] result = CalculateParameters();
+            if(result[1] > main.MaxV && main.Players.Count > 2)
+            {
+                Tank targetOld = target;
+                target = ChooseTarget();
+                if (target != targetOld)
+                {
+                    result = CalculateParameters(); 
+                }
+            }
+            if (result[1] > main.MaxV) result[1] = main.MaxV;
+            return result;
         }
 
+        private double[] CalculateParameters()
+        {
+            CalclulateRelativeCoordinates();
+            minAngle = FindMinAngle(target);
+            int angle = random.Next(minAngle, minAngle + 10);
+            player.SelectedBullet = ChooseBullet();
+            int windDirection = main.Wind / relativeX >= 0 ? 1 : -1;
+            int relativeWind = windDirection * Math.Abs(main.Wind);
+            int direction = relativeX >= 0 ? 0 : 1;
+            relativeX = Math.Abs(relativeX);
+            int power = FindPower(ref angle, relativeWind);
+            double calcPower = calc.CalculatePowerFromAngle(relativeX, relativeY, angle, windDirection * Math.Abs(main.Wind));
+
+            if (power <= 5) power = 5;
+            return new double[] { direction, power, angle, relativeX, relativeY, windDirection * Math.Abs(main.Wind), 0, player.SelectedBullet.SpeedMultiplier, calcPower };
+        }
+
+        private int FindPower(ref int angle, int relativeWind)
+        {
+            int power = calc.CalculatePower(relativeWind, (int)Math.Round(relativeX), (int)Math.Round(relativeY), angle);
+            int powerOld;
+            int counter = 0;
+            while (power > main.MaxV)
+            {
+                angle += aDelta;
+                powerOld = power;
+                if (counter < counterMax)
+                {
+                    power = calc.CalculateSecondPower(relativeWind, (int)Math.Round(relativeX), (int)Math.Round(relativeY), angle);
+                    counter++;
+                }
+                else
+                {
+                    power = calc.CalculatePower(relativeWind, (int)Math.Round(relativeX), (int)Math.Round(relativeY), angle);
+                    counter = 0;
+                }
+                if (power > powerOld)
+                {
+                    power = powerOld;
+                    angle -= aDelta;
+                    break;
+                }
+            }
+
+            return power;
+        }
 
         private int FindMinAngle(Tank tar)
         {
@@ -82,7 +118,7 @@ namespace Canvas_test
                     tmpMinAngle = tmpAngle;
                 }
             }
-            tmpMinAngle += 40;
+            tmpMinAngle += 20;
             if (tmpMinAngle > 70) tmpMinAngle = 70;
             return (int)tmpMinAngle;
         }

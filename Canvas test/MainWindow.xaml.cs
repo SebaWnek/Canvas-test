@@ -19,6 +19,7 @@ using System.Threading;
 using System.Windows.Media.Animation;
 using System.Reflection;
 using System.Collections.ObjectModel;
+using System.Media;
 
 namespace Canvas_test
 {
@@ -27,34 +28,43 @@ namespace Canvas_test
     /// </summary>
     public partial class MainWindow : Window
     {
-        public sqlLogger logger;
-        double[] loggerData = new double[8];
-        System.Timers.Timer timer = new System.Timers.Timer();
-        static int timeInterval = 10;
-        int waitMultiplier = 1;
-        int wind;
-        bool isStarted = false;
         Random rnd = new Random();
+        MediaPlayer player = new MediaPlayer();
+        public sqlConnector logger;
+        double[] loggerData = new double[9];
+        private List<Tank> players;
+        public List<Tank> Players => players;
+        System.Timers.Timer timer = new System.Timers.Timer();
+        List<Player.PlayerType> playerTypes = new List<Player.PlayerType>();
+        int wind;
         Bullet bullet = null;
-        int terrainLength = 1000;
-        int maxHeight = 500;
-        int baseMaxV = 100;
-        private double maxVMultiplier = 1;
         public CanvasConvert coord;
         Ground terrain;
-        int playerCount = 0;
-        public List<Tank> Players => players;
         List<Tank> removeList = new List<Tank>();
         bool hit = false;
         public Tank activePlayer;
         private List<System.Windows.Media.Brush> _brushes;
         List<System.Windows.Point> pointList;
         ObservableCollection<Bullet> currentBullets = new ObservableCollection<Bullet>();
+        int playerCount = 0;
         int stepsCount = 0;
         int currentStep = 0;
-        int step = 50;
-        List<Player.PlayerType> playerTypes = new List<Player.PlayerType>();
-        private List<Tank> players;
+        //for future use
+        bool isStarted = false;
+
+        /// <summary>
+        /// Settings:
+        /// </summary>
+        private double maxVMultiplier = 1; 
+        int terrainLength = 1000;                                   //terrain length
+        int maxHeight = 500;                                        //max terrain heigth
+        int baseMaxV = 100;                                         //max velocity setting
+        int step = 100;                                             //setting for animation accuracy 
+        int waitMultiplier = 10;                                    //setting for wait time between AI moves
+        static int timeInterval = 20;                               //time interval between animation steps
+        bool playSound = false;                                     //play sounds or mute
+        bool isReadingPlayers = true;                               //read players from menu or use procedural list for simulation
+        Ground.GroundType groundType = Ground.GroundType.normal;    //ground type setting
 
         public int MaxV
         {
@@ -69,22 +79,24 @@ namespace Canvas_test
         public MainWindow()
         {
             InitializeComponent();
-            //playerTypes.Add(Player.PlayerType.Hard);
-            //playerTypes.Add(Player.PlayerType.Hard);
-            //playerTypes.Add(Player.PlayerType.Hard);
-            //playerTypes.Add(Player.PlayerType.Hard);
-            //playerTypes.Add(Player.PlayerType.Hard);
-            //playerTypes.Add(Player.PlayerType.Hard);
-            //playerTypes.Add(Player.PlayerType.Hard);
-            //playerTypes.Add(Player.PlayerType.Hard);
-            //playerTypes.Add(Player.PlayerType.Hard);
-            //playerTypes.Add(Player.PlayerType.Hard);
+        }
+
+        private void Player_MediaEnded(object sender, EventArgs e)
+        {
+            player.Position = TimeSpan.Zero;
+            if (playSound)
+            {
+                player.Open(new Uri(@"C:\Users\wneko\Source\Repos\SebaWnek\Canvas-test\Canvas test\Resources\background.wav"));
+                player.MediaEnded += Player_MediaEnded;
+                player.Play(); 
+            }
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            timer.Elapsed += Timer_Elapsed;
             timer.Interval = timeInterval;
+            timer.Elapsed += Timer_Elapsed;
+            player.Play();
         }
 
         private async void ContinueGame()
@@ -100,7 +112,7 @@ namespace Canvas_test
             isStarted = true;
             InitBrushes();
             coord = new CanvasConvert(background.ActualHeight, background.ActualWidth, terrainLength);
-            terrain = new Ground(terrainLength, maxHeight, coord, ground, Ground.GroundType.zero);
+            terrain = new Ground(terrainLength, maxHeight, coord, ground, groundType);
             players = new List<Tank>();
             for (int i = 0; i < playerCount; i++)
             {
@@ -108,9 +120,9 @@ namespace Canvas_test
                 Players[i].MoveTank();
                 Players[i].MoveTarget();
                 Players[i].AddBullet(new Bullet(Bullet.BulletType.SmallBullet, 99));
-                Players[i].AddBullet(new Bullet(Bullet.BulletType.BigBullet, 0));
-                Players[i].AddBullet(new Bullet(Bullet.BulletType.Nuclear, 1));
-                Players[i].AddBullet(new Bullet(Bullet.BulletType.Sniper, 5));
+                Players[i].AddBullet(new Bullet(Bullet.BulletType.BigBullet, 10));
+                Players[i].AddBullet(new Bullet(Bullet.BulletType.Nuclear, 10));
+                Players[i].AddBullet(new Bullet(Bullet.BulletType.Sniper, 10));
                 Players[i].SelectedBullet = Players[i].Bullets[Bullet.BulletType.SmallBullet];
             }
             activePlayer = Players[0];
@@ -126,16 +138,30 @@ namespace Canvas_test
 
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            Dispatcher.InvokeAsync(() =>
-            {
-                line.Points.Add(pointList[currentStep]);
-                currentStep += step;
-                if (currentStep >= stepsCount)
+            //Dispatcher.InvokeAsync(() =>
+            //{
+                if (currentStep < stepsCount)
+                {
+                    Dispatcher.InvokeAsync(()=>
+                    {
+                        if (currentStep > pointList.Count - 1) currentStep = pointList.Count - 1;
+                        line.Points.Add(pointList[currentStep]);
+                        currentStep += step;
+                    });
+                }
+                else
                 {
                     timer.Stop();
-                    SimulationFinished();
+                    Dispatcher.InvokeAsync(() =>
+                    {
+                        SimulationFinished();
+                    if (playSound)
+                    {
+                        bullet.PlayHit();
+                    }
+                    });
                 }
-            });
+            //});
         }
 
         private async void SimulationFinished()
@@ -153,7 +179,7 @@ namespace Canvas_test
                     player.MoveTarget();
                 }
                 CheckDamage(bullet.X);
-                if (logger.isConnected && activePlayer.player.Type == Player.PlayerType.Medium)
+                if (logger.isConnected)
                 {
                     int direction = (activePlayer.Direction == 'r' && bullet.X > activePlayer.PositionX) ||
                         (activePlayer.Direction != 'r' && bullet.X < activePlayer.PositionX) ? 1 : -1;
@@ -162,7 +188,6 @@ namespace Canvas_test
                     logger.LogShot(loggerData);
                 }
                 GenerateWind();
-                bullet = null;
                 activePlayer = NextPlayer();
                 ListCurrentBullets();
                 await AiMoveAsync();
@@ -170,7 +195,6 @@ namespace Canvas_test
             else
             {
                 GenerateWind();
-                bullet = null;
                 activePlayer = NextPlayer();
                 ListCurrentBullets();
                 await AiMoveAsync();
@@ -213,15 +237,15 @@ namespace Canvas_test
             if (Players.Count == 1)
             {
                 isStarted = false;
-                ContinueGame();
-                //MessageBox.Show($"{Players.First().Name} has won!");
+                //ContinueGame();
+                MessageBox.Show($"{Players.First().Name} has won!");
                 //mainMenu.Visibility = Visibility.Visible;
             }
             if (Players.Count == 0)
             {
                 isStarted = false;
-                ContinueGame();
-                //MessageBox.Show("Tie!");
+                //ContinueGame();
+                MessageBox.Show("Tie!");
                 //mainMenu.Visibility = Visibility.Visible;
             }
         }
@@ -275,14 +299,22 @@ namespace Canvas_test
                 activePlayer.MoveTank();
                 activePlayer.MoveTarget();
                 await PutTaskDelay();
-                if (logger.isConnected && activePlayer.player.Type == Player.PlayerType.Medium)
+                if (logger.isConnected)
                 {
                     loggerData[0] = aiCoords[3];
                     loggerData[1] = aiCoords[4];
                     loggerData[4] = aiCoords[5];
                     loggerData[5] = aiCoords[1];
-                    loggerData[6] = aiCoords[2];
+                    loggerData[6] = aiCoords[2] * aiCoords[7];
                     loggerData[7] = aiCoords[6];
+                    if (aiCoords.Length == 9)
+                    {
+                        loggerData[8] = aiCoords[8]; 
+                    }
+                    else
+                    {
+                        loggerData[8] = 0;
+                    }
                 }
                 Shot();
             }
@@ -324,6 +356,17 @@ namespace Canvas_test
                 {
                     if (activePlayer.SelectedBullet.BulletCount > 0)
                     {
+                        if (logger.isConnected)
+                        {
+                            int direction = activePlayer.Direction == 'r' ? 0 : 1;
+                            int windDirection = (Wind > 0 && direction == 0) || (Wind < 0 && direction == 1) ? 1 : -1;
+                            loggerData[0] = 0;
+                            loggerData[1] = 0;
+                            loggerData[4] = windDirection * Math.Abs(Wind);
+                            loggerData[5] = activePlayer.Velocity * bullet.SpeedMultiplier;
+                            loggerData[6] = activePlayer.Angle;
+                            loggerData[7] = -3;
+                        } 
                         Shot();
                     }
                     else
@@ -402,6 +445,10 @@ namespace Canvas_test
             pointList = bullet.CalulateShot(coord, Terrain, Wind, out hit);
             stepsCount = pointList.Count;
             currentStep = 0;
+            if (playSound)
+            {
+                bullet.PlayShot(); 
+            }
             timer.Start();
         }
 
@@ -466,7 +513,7 @@ namespace Canvas_test
         {
             ReadPlayerTypes();
             sqlPasswordBox.SecurePassword.MakeReadOnly();
-            logger = new sqlLogger(sqlPasswordBox.SecurePassword);
+            logger = new sqlConnector(sqlPasswordBox.SecurePassword);
             if (playerCount >= 2)
             {
                 mainMenu.Visibility = Visibility.Collapsed;
@@ -480,13 +527,29 @@ namespace Canvas_test
 
         private void ReadPlayerTypes()
         {
-            foreach(ListBox type in playerTypeSelector.Children)
+            if (isReadingPlayers)
             {
-                if (type.SelectedIndex >= 0)
+                foreach (ListBox type in playerTypeSelector.Children)
                 {
-                    playerTypes.Add((Player.PlayerType)type.SelectedIndex);
+                    if (type.SelectedIndex >= 0)
+                    {
+                        playerTypes.Add((Player.PlayerType)type.SelectedIndex);
+                        playerCount++;
+                    }
+                } 
+            }
+
+            else
+            {
+                for (int i = 0; i < 26; i++)
+                {
+                    //playerTypes.Add(Player.PlayerType.Medium);
+                    //playerCount++;
+                    //playerTypes.Add(Player.PlayerType.Hard);
+                    //playerCount++;
+                    playerTypes.Add(Player.PlayerType.Learning);
                     playerCount++;
-                }
+                } 
             }
         }
     }

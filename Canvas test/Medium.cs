@@ -18,25 +18,25 @@ namespace Canvas_test
         }
         public override double[] ChooseParameters()
         {
-            windDivider = random.Next(1, 26);
+            windDivider = random.Next(8, 12);
             target = ChooseTarget();
             CalclulateRelativeCoordinates();
             minAngle = FindMinAngle(target);
-            int angle = random.Next(minAngle,minAngle + 30);
+            int angle = random.Next(minAngle,minAngle + 10);
             if (angle > 85) angle = 80;
             player.SelectedBullet = ChooseBullet();
             double windCoefficient = Math.Abs(main.Wind) * Math.Abs(main.Wind) * ((double)angle / 61) * ((double)angle / 61) / windDivider;
-            int windDirection = main.Wind/relativeX >= 0 ? -1 : 1;
+            int windDirection = main.Wind/relativeX >= 0 ? 1 : -1;
 
             int direction = relativeX >= 0 ? 0 : 1;
             relativeX = Math.Abs(relativeX);
             double radAngle = (angle) * Math.PI / 180;
             int power = (int)Math.Sqrt((g * relativeX * relativeX) / 
                                   (relativeX * Math.Sin(2 * radAngle) - 2 * relativeY * Math.Cos(radAngle) * Math.Cos(radAngle)));
-            power = power + windDirection * (int)(windCoefficient * power);
+            power = power - windDirection * (int)(windCoefficient * power);
             if (power > 100) power = 100;
             if (power <= 0) power = 10;
-            return new double[] { direction, power, angle, relativeX, relativeY, windDirection * Math.Abs(main.Wind), windDivider };
+            return new double[] { direction, power, angle, relativeX, relativeY, windDirection * Math.Abs(main.Wind), windDivider, player.SelectedBullet.SpeedMultiplier };
         }
 
         private int FindMinAngle(Tank tar)
@@ -51,7 +51,6 @@ namespace Canvas_test
             {
                 targetX = target.PositionX;
             }
-            double targetY = main.Terrain.Height[(int)Math.Round(targetX)];
             double playerY = player.PositionY;
             double playerX = player.PositionX;
             double x;
@@ -71,7 +70,7 @@ namespace Canvas_test
                     tmpMinAngle = tmpAngle;
                 }
             }
-            tmpMinAngle += 40;
+            tmpMinAngle += 10;
             if (tmpMinAngle > 70) tmpMinAngle = 70;
             return (int)tmpMinAngle;
         }

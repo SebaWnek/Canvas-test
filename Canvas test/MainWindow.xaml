@@ -154,7 +154,7 @@
                     </ImageBrush>
                 </Polygon.Fill>
             </Polygon>
-            <ListBox x:Name="bulletSelector" Width="100" Height="100" Canvas.Top="10" Canvas.Right="10" SelectionChanged="BulletSelector_SelectionChanged" Background="#88FFFFFF"/>
+            <ListBox x:Name="bulletSelector" Width="130" Height="100" Canvas.Top="10" Canvas.Right="10" SelectionChanged="BulletSelector_SelectionChanged" Background="#88FFFFFF"/>
         </Canvas>
     </Grid>
 </Window>

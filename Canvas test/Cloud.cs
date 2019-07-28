@@ -59,7 +59,7 @@ namespace Canvas_test
             {
                 positionX = -200;
             }
-            Application.Current.Dispatcher.Invoke(() =>
+            Application.Current.Dispatcher.InvokeAsync(() =>
             {
                 Canvas.SetLeft(elipse, coord.ToInt(positionX, positionY)[0]);
             });

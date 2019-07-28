@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Media;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media;
 
 namespace Canvas_test
 {
@@ -29,6 +31,11 @@ namespace Canvas_test
         public double SpeedMultiplier { get; set; }
         public double MaxVMultiplier { get; set; } = 1;
 
+        SoundPlayer shotPlayer;
+        SoundPlayer hitPlayer;
+        string hitSound;
+        string shotSound = @"C:\Users\wneko\Source\Repos\SebaWnek\Canvas-test\Canvas test\Resources\shot.wav";
+
         public override string ToString()
         {
             return BulletCount.ToString() + " - " + Type.ToString();
@@ -41,11 +48,12 @@ namespace Canvas_test
             switch (bullet)
             {
                 case BulletType.SmallBullet:
-                    Damage = 10;
+                    Damage = 20;
                     ExplosionRadius = 80;
                     ExplosionDestroyDistance = 20;
                     SpeedMultiplier = 1;
                     MaxVMultiplier = 1;
+                    hitSound = @"C:\Users\wneko\Source\Repos\SebaWnek\Canvas-test\Canvas test\Resources\smallExplosion.wav";
                     break;
                 case BulletType.BigBullet:
                     Damage = 40;
@@ -53,6 +61,7 @@ namespace Canvas_test
                     ExplosionDestroyDistance = 50;
                     SpeedMultiplier = 1;
                     MaxVMultiplier = 1;
+                    hitSound = @"C:\Users\wneko\Source\Repos\SebaWnek\Canvas-test\Canvas test\Resources\bigExplosion.wav";
                     break;
                 case BulletType.Nuclear:
                     Damage = 80;
@@ -60,6 +69,7 @@ namespace Canvas_test
                     ExplosionDestroyDistance = 100;
                     SpeedMultiplier = 1;
                     MaxVMultiplier = 0.5;
+                    hitSound = @"C:\Users\wneko\Source\Repos\SebaWnek\Canvas-test\Canvas test\Resources\atomExplosion.wav";
                     break;
                 case BulletType.Sniper:
                     Damage = 80;
@@ -67,10 +77,13 @@ namespace Canvas_test
                     ExplosionDestroyDistance = 10;
                     SpeedMultiplier = 10;
                     MaxVMultiplier = 1;
+                    hitSound = @"C:\Users\wneko\Source\Repos\SebaWnek\Canvas-test\Canvas test\Resources\sniperExplosion.wav";
                     break;
                 default:
                     throw new Exception("Wrong bullet type");
             }
+            shotPlayer = new SoundPlayer(shotSound);
+            hitPlayer = new SoundPlayer(hitSound);
         }
         public void FireBullet(double x, double y, double speed, int angle, char direction)
         {
@@ -119,6 +132,16 @@ namespace Canvas_test
             }
             hit = terrainHit || tankHit;
             return result;
+        }
+
+        public void PlayHit()
+        {
+            hitPlayer.Play();
+        }
+
+        public void PlayShot()
+        {
+            shotPlayer.Play();
         }
     }
 }

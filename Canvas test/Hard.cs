@@ -9,7 +9,6 @@ namespace Canvas_test
     class Hard : Player
     {
         static Dictionary<Tank, int[]> targets = new Dictionary<Tank, int[]>();
-        int targetCount;
         bool lineOfSight = false;
         int multiple;
         bool willHit;
@@ -38,7 +37,8 @@ namespace Canvas_test
             choosenParams = FindParameters(results, minAngle, lineOfSight);
             power = choosenParams[0];
             angle = (int)choosenParams[1];
-            return new double[] { direction, power, angle, relativeX, relativeY, a };
+            int windDirection = (main.Wind > 0 && direction == 0) || (main.Wind < 0 && direction == 1) ? 1 : -1;
+            return new double[] { direction, power, angle, Math.Abs(relativeX), relativeY, windDirection * Math.Abs(main.Wind), -2, player.SelectedBullet.SpeedMultiplier };
         }
         // to be changed later
         protected override Bullet ChooseBullet()

@@ -22,7 +22,8 @@ namespace Canvas_test
             int direction = random.Next(2);
             int power = random.Next(20, main.MaxV + 1);
             int angle = random.Next(20, 91);
-            return new double[] { direction, power, angle };
+            int windDirection = (main.Wind > 0 && direction == 0) || (main.Wind < 0 && direction == 1) ? 1 : -1;
+            return new double[] { direction, power, angle, 0, 0, windDirection * Math.Abs(main.Wind), -1, player.SelectedBullet.SpeedMultiplier };
         }
 
         protected override Bullet ChooseBullet()

@@ -17,7 +17,7 @@ namespace Canvas_test
         {
             timer = new Timer();
             timer.AutoReset = true;
-            timer.Interval = 1000 / 30;
+            timer.Interval = 1000/30;
             timer.Start();
             clouds.Clear();
             for (int i = 0; i < count; i++)
