@@ -25,7 +25,9 @@
                 <StackPanel Orientation="Horizontal">
                     <Label Content="Sql password"/>
                     <PasswordBox x:Name="sqlPasswordBox" Width="100" Password=""/>
-            </StackPanel>
+                    <Label Content="connect?"/>
+                    <CheckBox x:Name="sqlConnectBox" IsChecked="False" Margin="5"/>
+                </StackPanel>
                     <Grid x:Name="playerTypeSelector">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition/>

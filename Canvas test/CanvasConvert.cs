@@ -7,6 +7,9 @@ using System.Windows;
 
 namespace Canvas_test
 {
+    /// <summary>
+    /// Class for converting world coordinates into screen coordinates of canvas
+    /// </summary>
     public class CanvasConvert
     {
         private double canvasHeigth;

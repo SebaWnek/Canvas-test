@@ -68,9 +68,9 @@ namespace Canvas_test
 
         protected Tank ChooseTarget(out int multiple)
         {
-            if(main.Players.Count == 2)
+            if(main.AlivePlayers.Count == 2)
             {
-                foreach(Tank tank in main.Players)
+                foreach(Tank tank in main.AlivePlayers)
                 {
                     if (tank != player)
                     {
@@ -81,7 +81,7 @@ namespace Canvas_test
             }
             targets.Clear();
             int[] score = new int[2];
-            foreach (Tank tank in main.Players)
+            foreach (Tank tank in main.AlivePlayers)
             {
                 if (tank != player)
                 {
@@ -126,7 +126,7 @@ namespace Canvas_test
         {
             int result = 0;
             double distance;
-            foreach(Tank target in main.Players)
+            foreach(Tank target in main.AlivePlayers)
             {
                 if (target != player && target != tank)
                 {

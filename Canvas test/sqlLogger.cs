@@ -25,7 +25,10 @@ namespace Canvas_test
         string cmd;
         NumberFormatInfo nfi = new NumberFormatInfo();
 
-
+        public sqlConnector()
+        {
+            isConnected = false;
+        }
         public sqlConnector(SecureString pass)
         {
             try
@@ -68,25 +71,35 @@ namespace Canvas_test
         public DataTable GetData(int wind, int minX, int maxX, int minY, int maxY, int minAngle, int maxAngle)
         {
             DataTable records = new DataTable();
-            cmd = $@"select hitX, hitY, angle, power " +
-                  $@"from {table} where wind = {wind} and hitX >= {minX} and hitX <= {maxX} and hitY >= {minY} and hitY <= {maxY} and angle >= {minAngle} and angle <= {maxAngle}";
-            command.CommandText = cmd;
-            adapter = new SqlDataAdapter(command);
-            adapter.Fill(records);
+            if (isConnected)
+            {
+                cmd = $@"select hitX, hitY, angle, power " +
+              $@"from {table} where wind = {wind} and hitX >= {minX} and hitX <= {maxX} and hitY >= {minY} and hitY <= {maxY} and angle >= {minAngle} and angle <= {maxAngle}";
+                command.CommandText = cmd;
+                adapter = new SqlDataAdapter(command);
+                adapter.Fill(records); 
+            }
             return records;
         }
         public int GetCount(int wind, int minX, int maxX, int minY, int maxY, int minAngle, int maxAngle)
         {
-            int count;
-            DataTable records = new DataTable();
-            cmd = $@"select count(hitX)" +
-                  $@"from {table} where wind = {wind} and hitX >= {minX} and hitX <= {maxX} and hitY >= {minY} and hitY <= {maxY} and angle >= {minAngle} and angle <= {maxAngle}";
-            command.CommandText = cmd;
-            reader = command.ExecuteReader();
-            reader.Read();
-            count = (int)reader[0];
-            reader.Close();
-            return count;
+            if (isConnected)
+            {
+                int count;
+                DataTable records = new DataTable();
+                cmd = $@"select count(hitX)" +
+                      $@"from {table} where wind = {wind} and hitX >= {minX} and hitX <= {maxX} and hitY >= {minY} and hitY <= {maxY} and angle >= {minAngle} and angle <= {maxAngle}";
+                command.CommandText = cmd;
+                reader = command.ExecuteReader();
+                reader.Read();
+                count = (int)reader[0];
+                reader.Close();
+                return count; 
+            }
+            else
+            {
+                return -1;
+            }
         }
     }
 }

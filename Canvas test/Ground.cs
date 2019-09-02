@@ -36,6 +36,13 @@ namespace Canvas_test
             HeigthToTerrain();
         }
 
+        public void ResetGround(GroundType type)
+        {
+            Height = new double[terrainLength + 1];
+            GenerateTerrain(type, 0.1);
+            HeigthToTerrain();
+        }
+
         private void HeigthToTerrain()
         {
             ground.Points.Clear();

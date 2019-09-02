@@ -32,6 +32,8 @@ namespace Canvas_test
         MediaPlayer player = new MediaPlayer();
         public sqlConnector logger;
         double[] loggerData = new double[9];
+        private List<Tank> alivePlayers;
+        public List<Tank> AlivePlayers => alivePlayers;
         private List<Tank> players;
         public List<Tank> Players => players;
         System.Timers.Timer timer = new System.Timers.Timer();
@@ -55,7 +57,7 @@ namespace Canvas_test
         /// <summary>
         /// Settings:
         /// </summary>
-        private double maxVMultiplier = 1; 
+        private double maxVMultiplier = 1;
         int terrainLength = 1000;                                   //terrain length
         int maxHeight = 500;                                        //max terrain heigth
         int baseMaxV = 100;                                         //max velocity setting
@@ -88,7 +90,7 @@ namespace Canvas_test
             {
                 player.Open(new Uri(@"C:\Users\wneko\Source\Repos\SebaWnek\Canvas-test\Canvas test\Resources\background.wav"));
                 player.MediaEnded += Player_MediaEnded;
-                player.Play(); 
+                player.Play();
             }
         }
 
@@ -101,10 +103,35 @@ namespace Canvas_test
 
         private async void ContinueGame()
         {
-            activePlayer.RemovePlayer();
-            players.Clear();
+            if (AlivePlayers.Count == 1)
+                AlivePlayers[0].RemovePlayerFromMap();
+            AlivePlayers.Clear();
             await PutTaskDelay();
-            GenerateNewGame();
+            ResetGame();
+        }
+
+        private async void ResetGame()
+        {
+            isStarted = true;
+            terrain.ResetGround(groundType);
+            alivePlayers = Players.Select(n => n).ToList();
+            playerCount = Players.Count;
+            foreach(Tank player in AlivePlayers)
+            {
+                player.HP = 100;
+                player.AddPlayerToMap();
+                player.PositionX = rnd.Next(10, terrainLength - 10);
+                player.MoveTank();
+                player.MoveTarget();
+            }
+            activePlayer = AlivePlayers[0];
+            background.DataContext = activePlayer;
+            bulletSelector.ItemsSource = currentBullets;
+            activePlayer.activeSign.Visibility = Visibility.Visible;
+            activePlayer.target.Visibility = Visibility.Visible;
+            GenerateWind();
+            ListCurrentBullets();
+            await AiMoveAsync();
         }
 
         private async void GenerateNewGame()
@@ -113,6 +140,7 @@ namespace Canvas_test
             InitBrushes();
             coord = new CanvasConvert(background.ActualHeight, background.ActualWidth, terrainLength);
             terrain = new Ground(terrainLength, maxHeight, coord, ground, groundType);
+            alivePlayers = new List<Tank>();
             players = new List<Tank>();
             for (int i = 0; i < playerCount; i++)
             {
@@ -125,12 +153,13 @@ namespace Canvas_test
                 Players[i].AddBullet(new Bullet(Bullet.BulletType.Sniper, 10));
                 Players[i].SelectedBullet = Players[i].Bullets[Bullet.BulletType.SmallBullet];
             }
-            activePlayer = Players[0];
+            alivePlayers = Players.Select(n => n).ToList();
+            activePlayer = AlivePlayers[0];
             background.DataContext = activePlayer;
             bulletSelector.ItemsSource = currentBullets;
             activePlayer.activeSign.Visibility = Visibility.Visible;
             activePlayer.target.Visibility = Visibility.Visible;
-            Sky.GenerateClouds(10);
+            Sky.GenerateClouds(20);
             GenerateWind();
             ListCurrentBullets();
             await AiMoveAsync();
@@ -140,27 +169,27 @@ namespace Canvas_test
         {
             //Dispatcher.InvokeAsync(() =>
             //{
-                if (currentStep < stepsCount)
+            if (currentStep < stepsCount)
+            {
+                Dispatcher.InvokeAsync(() =>
                 {
-                    Dispatcher.InvokeAsync(()=>
-                    {
-                        if (currentStep > pointList.Count - 1) currentStep = pointList.Count - 1;
-                        line.Points.Add(pointList[currentStep]);
-                        currentStep += step;
-                    });
-                }
-                else
+                    if (currentStep > pointList.Count - 1) currentStep = pointList.Count - 1;
+                    line.Points.Add(pointList[currentStep]);
+                    currentStep += step;
+                });
+            }
+            else
+            {
+                timer.Stop();
+                Dispatcher.InvokeAsync(() =>
                 {
-                    timer.Stop();
-                    Dispatcher.InvokeAsync(() =>
-                    {
-                        SimulationFinished();
+                    SimulationFinished();
                     if (playSound)
                     {
                         bullet.PlayHit();
                     }
-                    });
-                }
+                });
+            }
             //});
         }
 
@@ -173,7 +202,7 @@ namespace Canvas_test
                 activePlayer.MoveTank();
                 activePlayer.MoveTarget();
                 ShowExplosion(bullet.ExplosionRadius);
-                foreach (Tank player in Players)
+                foreach (Tank player in AlivePlayers)
                 {
                     player.MoveTank();
                     player.MoveTarget();
@@ -187,10 +216,13 @@ namespace Canvas_test
                     loggerData[3] = bullet.Y - activePlayer.PositionY;
                     logger.LogShot(loggerData);
                 }
-                GenerateWind();
-                activePlayer = NextPlayer();
-                ListCurrentBullets();
-                await AiMoveAsync();
+                if (isStarted)
+                {
+                    GenerateWind();
+                    activePlayer = NextPlayer();
+                    ListCurrentBullets();
+                    await AiMoveAsync();
+                }
             }
             else
             {
@@ -216,12 +248,12 @@ namespace Canvas_test
         private void CheckDamage(double x)
         {
             bool isAlive;
-            foreach (Tank player in Players)
+            foreach (Tank player in AlivePlayers)
             {
                 isAlive = player.CheckIfAlive(x, bullet.Damage, bullet.ExplosionDestroyDistance);
                 if (!isAlive)
                 {
-                    player.RemovePlayer();
+                    player.RemovePlayerFromMap();
                     playerCount--;
                     removeList.Add(player);
                 }
@@ -230,24 +262,28 @@ namespace Canvas_test
             {
                 foreach (Tank player in removeList)
                 {
-                    Players.Remove(player);
+                    AlivePlayers.Remove(player);
                 }
             }
             removeList.Clear();
-            if (Players.Count == 1)
+            if (AlivePlayers.Count <= 1)
             {
+                MessageBox.Show(
+                    AlivePlayers.Count == 1 ?
+                    $"{AlivePlayers.First().Name} has won!" :
+                    "Tie!"
+                    );
                 isStarted = false;
-                //ContinueGame();
-                MessageBox.Show($"{Players.First().Name} has won!");
+                ContinueGame();
                 //mainMenu.Visibility = Visibility.Visible;
             }
-            if (Players.Count == 0)
-            {
-                isStarted = false;
-                //ContinueGame();
-                MessageBox.Show("Tie!");
-                //mainMenu.Visibility = Visibility.Visible;
-            }
+            //if (Players.Count == 0)
+            //{
+            //    isStarted = false;
+            //    ContinueGame();
+            //    MessageBox.Show("Tie!");
+            //    //mainMenu.Visibility = Visibility.Visible;
+            //}
         }
 
         private Tank NextPlayer()
@@ -256,23 +292,23 @@ namespace Canvas_test
             {
                 activePlayer.activeSign.Visibility = Visibility.Hidden;
                 activePlayer.target.Visibility = Visibility.Hidden;
-                int currentPlayerNumber = Players.IndexOf(activePlayer);
+                int currentPlayerNumber = AlivePlayers.IndexOf(activePlayer);
                 if (currentPlayerNumber + 1 < playerCount)
                 {
-                    Players[currentPlayerNumber + 1].activeSign.Visibility = Visibility.Visible;
-                    Players[currentPlayerNumber + 1].target.Visibility = Visibility.Visible;
-                    background.DataContext = Players[currentPlayerNumber + 1];
-                    activePlayer.SelectedBullet = Players[currentPlayerNumber + 1].Bullets[Bullet.BulletType.SmallBullet];
-                    return Players[currentPlayerNumber + 1];
+                    AlivePlayers[currentPlayerNumber + 1].activeSign.Visibility = Visibility.Visible;
+                    AlivePlayers[currentPlayerNumber + 1].target.Visibility = Visibility.Visible;
+                    background.DataContext = AlivePlayers[currentPlayerNumber + 1];
+                    activePlayer.SelectedBullet = AlivePlayers[currentPlayerNumber + 1].Bullets[Bullet.BulletType.SmallBullet];
+                    return AlivePlayers[currentPlayerNumber + 1];
                 }
                 else
                 {
-                    Players[0].activeSign.Visibility = Visibility.Visible;
-                    Players[0].target.Visibility = Visibility.Visible;
-                    background.DataContext = Players[0];
-                    activePlayer.SelectedBullet = Players[0].Bullets[Bullet.BulletType.SmallBullet];
-                    return Players[0];
-                } 
+                    AlivePlayers[0].activeSign.Visibility = Visibility.Visible;
+                    AlivePlayers[0].target.Visibility = Visibility.Visible;
+                    background.DataContext = AlivePlayers[0];
+                    activePlayer.SelectedBullet = AlivePlayers[0].Bullets[Bullet.BulletType.SmallBullet];
+                    return AlivePlayers[0];
+                }
             }
             else
             {
@@ -309,7 +345,7 @@ namespace Canvas_test
                     loggerData[7] = aiCoords[6];
                     if (aiCoords.Length == 9)
                     {
-                        loggerData[8] = aiCoords[8]; 
+                        loggerData[8] = aiCoords[8];
                     }
                     else
                     {
@@ -366,7 +402,7 @@ namespace Canvas_test
                             loggerData[5] = activePlayer.Velocity * bullet.SpeedMultiplier;
                             loggerData[6] = activePlayer.Angle;
                             loggerData[7] = -3;
-                        } 
+                        }
                         Shot();
                     }
                     else
@@ -447,7 +483,7 @@ namespace Canvas_test
             currentStep = 0;
             if (playSound)
             {
-                bullet.PlayShot(); 
+                bullet.PlayShot();
             }
             timer.Start();
         }
@@ -512,12 +548,16 @@ namespace Canvas_test
         private void StartButton_Click(object sender, RoutedEventArgs e)
         {
             ReadPlayerTypes();
-            sqlPasswordBox.SecurePassword.MakeReadOnly();
-            logger = new sqlConnector(sqlPasswordBox.SecurePassword);
+            if (sqlConnectBox.IsChecked == true)
+            {
+                sqlPasswordBox.SecurePassword.MakeReadOnly();
+                logger = new sqlConnector(sqlPasswordBox.SecurePassword);
+            }
+            else logger = new sqlConnector();
             if (playerCount >= 2)
             {
                 mainMenu.Visibility = Visibility.Collapsed;
-                GenerateNewGame(); 
+                GenerateNewGame();
             }
             else
             {
@@ -536,7 +576,7 @@ namespace Canvas_test
                         playerTypes.Add((Player.PlayerType)type.SelectedIndex);
                         playerCount++;
                     }
-                } 
+                }
             }
 
             else
@@ -549,7 +589,7 @@ namespace Canvas_test
                     //playerCount++;
                     playerTypes.Add(Player.PlayerType.Learning);
                     playerCount++;
-                } 
+                }
             }
         }
     }

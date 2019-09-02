@@ -5,6 +5,8 @@ VisualStudioVersion = 16.0.28803.202
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Canvas test", "Canvas test\Canvas test.csproj", "{B6F0D95D-0BB6-4E2F-8F52-F0D71F4A5088}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Canvas testTests", "Canvas testTests\Canvas testTests.csproj", "{72C3A4A4-8FE9-4E70-8ABB-207971CF0BEF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{B6F0D95D-0BB6-4E2F-8F52-F0D71F4A5088}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B6F0D95D-0BB6-4E2F-8F52-F0D71F4A5088}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B6F0D95D-0BB6-4E2F-8F52-F0D71F4A5088}.Release|Any CPU.Build.0 = Release|Any CPU
+		{72C3A4A4-8FE9-4E70-8ABB-207971CF0BEF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{72C3A4A4-8FE9-4E70-8ABB-207971CF0BEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{72C3A4A4-8FE9-4E70-8ABB-207971CF0BEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{72C3A4A4-8FE9-4E70-8ABB-207971CF0BEF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

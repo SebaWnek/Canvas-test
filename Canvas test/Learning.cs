@@ -26,7 +26,7 @@ namespace Canvas_test
         {
             target = ChooseTarget();
             double[] result = CalculateParameters();
-            if(result[1] > main.MaxV && main.Players.Count > 2)
+            if(result[1] > main.MaxV && main.AlivePlayers.Count > 2)
             {
                 Tank targetOld = target;
                 target = ChooseTarget();
@@ -58,29 +58,37 @@ namespace Canvas_test
 
         private int FindPower(ref int angle, int relativeWind)
         {
-            int power = calc.CalculatePower(relativeWind, (int)Math.Round(relativeX), (int)Math.Round(relativeY), angle);
-            int powerOld;
-            int counter = 0;
-            while (power > main.MaxV)
+            int power;
+            if (connector.isConnected)
             {
-                angle += aDelta;
-                powerOld = power;
-                if (counter < counterMax)
+                power = calc.CalculatePower(relativeWind, (int)Math.Round(relativeX), (int)Math.Round(relativeY), angle);
+                int powerOld;
+                int counter = 0;
+                while (power > main.MaxV)
                 {
-                    power = calc.CalculateSecondPower(relativeWind, (int)Math.Round(relativeX), (int)Math.Round(relativeY), angle);
-                    counter++;
-                }
-                else
-                {
-                    power = calc.CalculatePower(relativeWind, (int)Math.Round(relativeX), (int)Math.Round(relativeY), angle);
-                    counter = 0;
-                }
-                if (power > powerOld)
-                {
-                    power = powerOld;
-                    angle -= aDelta;
-                    break;
-                }
+                    angle += aDelta;
+                    powerOld = power;
+                    if (counter < counterMax)
+                    {
+                        power = calc.CalculateSecondPower(relativeWind, (int)Math.Round(relativeX), (int)Math.Round(relativeY), angle);
+                        counter++;
+                    }
+                    else
+                    {
+                        power = calc.CalculatePower(relativeWind, (int)Math.Round(relativeX), (int)Math.Round(relativeY), angle);
+                        counter = 0;
+                    }
+                    if (power > powerOld)
+                    {
+                        power = powerOld;
+                        angle -= aDelta;
+                        break;
+                    }
+                } 
+            }
+            else
+            {
+                power = random.Next(0, main.MaxV + 1);
             }
 
             return power;

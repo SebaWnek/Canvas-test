@@ -91,7 +91,7 @@ namespace Canvas_test
         protected Tank ChooseTarget()
         {
             targets.Clear();
-            foreach(Tank tank in main.Players)
+            foreach(Tank tank in main.AlivePlayers)
             {
                 if(tank != player)
                 {

@@ -8,6 +8,10 @@ using System.Windows.Media;
 
 namespace Canvas_test
 {
+    /// <summary>
+    /// Class representing bullets 
+    /// All sounds from https://freesound.org/
+    /// </summary>
     public class Bullet
     {
         public enum BulletType
@@ -28,8 +32,8 @@ namespace Canvas_test
         public double Y { get; set; }
         public double SpeedX { get; set; }
         public double SpeedY { get; set; }
-        public double SpeedMultiplier { get; set; }
-        public double MaxVMultiplier { get; set; } = 1;
+        public double SpeedMultiplier { get; set; }      //allows higher speed for light, e.g. sniper bullets 
+        public double MaxVMultiplier { get; set; } = 1;  //allows lower max V for "heavy" bullets
 
         SoundPlayer shotPlayer;
         SoundPlayer hitPlayer;

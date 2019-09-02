@@ -113,7 +113,7 @@ namespace Canvas_test
             {
                 count = connector.GetCount(wind, minX, maxX, minY, maxY, minA, maxA);
                 if (count >= minPointCount) found = true;
-                else if (maxX > terrainLength || maxA > maxAngle) break;
+                else if (maxX > terrainLength || maxA > maxAngle || count == -1) break;
                 else
                 {
                     xDelta *= 2;

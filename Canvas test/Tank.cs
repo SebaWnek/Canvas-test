@@ -130,12 +130,7 @@ namespace Canvas_test
 
             HPLabel = new Label();
             HPLabel.Content = HP;
-
-            ((MainWindow)App.Current.MainWindow).AddToBackgroud(image);
-            ((MainWindow)App.Current.MainWindow).AddToBackgroud(target);
-            ((MainWindow)App.Current.MainWindow).AddToBackgroud(NameLabel);
-            ((MainWindow)App.Current.MainWindow).AddToBackgroud(activeSign);
-            ((MainWindow)App.Current.MainWindow).AddToBackgroud(HPLabel);
+            AddPlayerToMap();
 
             coord = cc;
             terrain = tr;
@@ -143,10 +138,11 @@ namespace Canvas_test
             PositionX = position;
         }
 
+
         internal static bool CheckHit(double x, double y)
         {
             bool hit = false;
-            foreach(Tank tank in main.Players)
+            foreach(Tank tank in main.AlivePlayers)
             {
                 double dx = Math.Abs(tank.PositionX - x);
                 double dy = Math.Abs(tank.PositionY - y);
@@ -217,13 +213,23 @@ namespace Canvas_test
             }
         }
 
-        public void RemovePlayer()
+        public void RemovePlayerFromMap()
         {
-            ((MainWindow)App.Current.MainWindow).RemoveFromBackground(image);
-            ((MainWindow)App.Current.MainWindow).RemoveFromBackground(target);
-            ((MainWindow)App.Current.MainWindow).RemoveFromBackground(NameLabel);
-            ((MainWindow)App.Current.MainWindow).RemoveFromBackground(activeSign);
-            ((MainWindow)App.Current.MainWindow).RemoveFromBackground(HPLabel);
+            main.RemoveFromBackground(image);
+            main.RemoveFromBackground(target);
+            main.RemoveFromBackground(NameLabel);
+            main.RemoveFromBackground(activeSign);
+            main.RemoveFromBackground(HPLabel);
+        }
+
+        public void AddPlayerToMap()
+        {
+            HPLabel.Content = HP;
+            main.AddToBackgroud(image);
+            main.AddToBackgroud(target);
+            main.AddToBackgroud(NameLabel);
+            main.AddToBackgroud(activeSign);
+            main.AddToBackgroud(HPLabel);
         }
     }
 }
